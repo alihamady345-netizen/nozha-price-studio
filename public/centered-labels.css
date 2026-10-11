@@ -1,0 +1,111 @@
+/* One physical grid for preview, PDF and print. */
+html[lang] .price-tag,html[lang] .price-tag.compact{display:block;position:relative;width:var(--tag-w);height:var(--tag-h);border:.2mm solid #aeb8b0;box-shadow:none;border-radius:0;padding:var(--tag-pad);overflow:hidden;background:#fff}
+html[lang] .price-tag.no-cut{border-color:transparent}
+html[lang] .price-tag::before,html[lang] .price-tag::after{content:'';display:block;position:absolute;border:0;border-radius:0;pointer-events:none}
+html[lang] .price-tag::before{top:0;right:0;left:auto;bottom:auto;width:27%;height:.85mm;background:var(--tag-brand)}
+html[lang] .price-tag::after{left:0;bottom:0;top:auto;right:auto;width:19%;height:.55mm;background:var(--tag-secondary)}
+html[lang] .tag-header{position:relative;display:block;width:100%;height:var(--header-h);min-height:0;border:0;border-bottom:.2mm solid #c8d0ca;padding:0 0 1mm;margin:0;text-align:center;line-height:0}
+html[lang] .tag-header::after{content:'';position:absolute;bottom:-.25mm;left:43%;width:14%;height:.5mm;background:var(--tag-secondary);border-radius:0}
+html[lang] .tag-logo{display:inline-block;vertical-align:top;width:var(--tag-logo-w);height:var(--tag-logo-h)}
+html[lang] .tag-signature{display:block;position:absolute;right:0;left:auto;top:20%;width:14%;max-width:21mm;height:55%;margin:0;opacity:1}
+html[lang] .tag-content{position:relative;display:block;width:var(--content-w);height:var(--content-h);min-height:0;margin:0;padding:0}
+html[lang] .tag-content-inner{position:absolute;left:0;top:50%;transform:translateY(-50%);display:block;width:100%;padding:0;text-align:center}
+html[lang] .tag-product,html[lang] .compact .tag-product{display:block;width:100%;max-width:100%;height:auto;min-height:0;text-align:center;margin:0;padding:0}
+html[lang] .tag-name,html[lang] .compact .tag-name{display:block;width:100%;max-width:100%;text-align:center;line-height:var(--name-line-height,1.3);letter-spacing:0;margin:0;padding:0;overflow-wrap:anywhere;color:#17231c}
+html[lang] .tag-name-line{display:block;width:100%;text-align:center;overflow-wrap:anywhere}
+html[lang] .tag-name[lang="ar"],html[lang] .tag-unit[lang="ar"],html[lang] .tag-promise{font-family:Arabic,Arial,sans-serif}
+html[lang] .tag-name[lang="en"],html[lang] .tag-unit[lang="en"]{font-family:Arial,Arabic,sans-serif}
+/* The pack size uses a text-width underline instead of an enclosing box. */
+html[lang] .tag-unit,html[lang] .compact .tag-unit{display:block;width:78%;max-width:78%;text-align:center;border:0;background:transparent;color:var(--tag-unit-color);padding:0;margin:var(--unit-margin) 0 0 22%;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+html[lang] .tag-unit-badge{position:relative;display:inline-block;box-sizing:border-box;max-width:100%;min-width:0;border:0;border-bottom:.18mm solid var(--tag-secondary);padding:0 .12em .16em;background:transparent;font-weight:700;line-height:1.3;vertical-align:top;overflow-wrap:anywhere}
+html[lang] .tag-unit-badge::after{content:'';position:absolute;left:25%;right:25%;bottom:0;height:.4mm;background:var(--tag-unit-color);pointer-events:none}
+html[lang] .compact .tag-unit-badge{border-bottom-width:.12mm;padding-bottom:.12em}
+html[lang] .compact .tag-unit-badge::after{height:.25mm}
+html[lang] .tag-price,html[lang] .compact .tag-price{position:relative;z-index:0;display:block;width:100%;max-width:100%;min-width:0;min-height:0;text-align:center;background:transparent;color:#101b15;border:0;border-radius:0;padding:0;margin:var(--price-margin) 0 0;line-height:1.1;letter-spacing:0;font-family:Arial,sans-serif;font-weight:700;direction:ltr;white-space:nowrap}
+/* Open horizontal rules keep the amount prominent without enclosing it in a box. */
+html[lang] .tag-price::before{content:'';position:absolute;z-index:-1;inset:0;background:#fff;border:0;border-top:.3mm solid var(--tag-brand);border-bottom:.7mm solid var(--tag-brand);border-radius:0;transform:none;pointer-events:none}
+html[lang] .tag-price::after{content:'';position:absolute;left:0;bottom:0;width:18%;height:1.1mm;background:var(--tag-brand);pointer-events:none}
+html[lang] .tag-price-inner{position:relative;left:var(--price-shift,0mm);display:inline-block;width:auto;white-space:nowrap;max-width:none;line-height:1.1;direction:ltr;padding:.18em 2.5mm}
+html[lang] .tag-price-inner::before{display:none;content:none}
+html[lang] .tag-price .fraction{font-size:.5em;letter-spacing:0}
+html[lang] .tag-currency,html[lang] .compact .tag-currency{font-family:Arial,sans-serif;font-weight:700;letter-spacing:0;margin-inline-start:1.5mm;line-height:1.3;white-space:nowrap;color:#263b2e}
+html[lang] .tag-footer,html[lang] .compact .tag-footer{display:block;width:100%;height:var(--tag-footer-h);min-height:0;border:0;border-top:.2mm solid #c8d0ca;padding:var(--footer-pad) 0 0;margin:0;text-align:center}
+html[lang] .tag-barcode{display:block;width:var(--barcode-w);max-width:100%;height:var(--barcode-h);margin:0 auto;fill:#000;stroke:none;background:#fff}
+html[lang] .barcode-number{margin:.35mm 0 0;width:100%;letter-spacing:.1mm;font-weight:400;line-height:1.35;color:#111;text-align:center;direction:ltr}
+html[lang] .large-label .tag-price::before{border-top-width:.45mm;border-bottom-width:1mm}
+html[lang] .large-label .tag-price::after{height:1.6mm}
+html[lang] .large-label::before{height:1.1mm;width:100%}
+html[lang] .large-label::after{height:.75mm;width:100%}
+html[lang] .large-label .tag-signature{max-width:26mm}
+html[lang] .price-tag.compact .tag-header{position:absolute;right:var(--tag-pad);left:auto;top:auto;bottom:var(--tag-pad);width:var(--tag-logo-w);height:var(--tag-logo-h);min-height:0;border:0;padding:0}
+html[lang] .compact .tag-signature,html[lang] .compact .tag-header::after{display:none}
+html[lang] .compact .tag-currency{margin-inline-start:.8mm}
+html[lang] .compact .tag-price-inner{padding:.18em 1mm}
+html[lang] .compact .tag-price::before{border-top-width:.15mm;border-bottom-width:.35mm}
+html[lang] .compact .tag-price::after{height:.55mm}
+html[lang] .compact .barcode-number{margin-top:.15mm;letter-spacing:.05mm}
+html[lang] .price-tag.compact::before{height:.45mm;width:25%}
+html[lang] .price-tag.compact::after{height:.3mm;width:18%}
+html[lang] .slot-empty-content{display:flex;align-items:center;justify-content:center;text-align:center;height:var(--content-h);min-height:0;padding:0;gap:1mm}
+html[lang] .empty-preview.compact .tag-header{top:auto;bottom:var(--tag-pad)}
+html[lang] .empty-preview.compact .slot-empty-content{padding:0;align-items:center;text-align:center}
+html[lang] .empty-preview.compact .tag-footer{display:none}
+html[lang] .empty-preview .tag-footer{font-size:var(--barcode-text);color:#98a99e}
+html[lang="en"] .price-tag.compact .tag-header{right:auto;left:var(--tag-pad)}
+html[lang="en"] .tag-signature{right:auto;left:0}
+html[lang="en"] .price-tag::before{right:auto;left:0}
+html[lang="en"] .price-tag::after{left:auto;right:0}
+html[data-output-mode="bw"] .tag-currency{color:#111}
+html[data-output-mode="bw"] .tag-header,html[data-output-mode="bw"] .tag-footer{border-color:#a6a6a6}
+html[data-output-mode="bw"] .tag-price::before{border-color:#707070}
+.l20{background:repeating-linear-gradient(90deg,transparent 0 4.5px,currentColor 4.5px 5.5px),repeating-linear-gradient(0deg,transparent 0 4px,currentColor 4px 5px)}
+@media print{html[lang] .price-tag.slot-selected{outline:0}.tag-content{break-inside:avoid}html[lang] .price-tag,html[lang] .price-tag *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+/* The original riyal vector keeps its geometry and a clear space on the left. */
+html[lang] .tag-price .riyal-symbol{display:inline-block;width:.653em;height:.73em;max-width:none;margin:0 .26em;padding:0;vertical-align:-.015em;object-fit:contain;transform:none}
+html[lang] .tag-promise{display:block;font-size:var(--promise-size);font-weight:700;line-height:1.4;white-space:nowrap;text-align:center;color:var(--tag-brand);margin:var(--promise-gap) 0 0;padding:0;border:0;letter-spacing:0}
+html[lang] .tag-promise i{display:inline-block;font-style:normal;color:var(--tag-secondary);margin:0 .6em}
+html[lang] .compact .tag-promise{width:100%;max-width:100%;margin-left:0;margin-right:0}
+html[lang] .compact .tag-promise i{margin:0 .35em}
+html[lang] .large-label .tag-footer{border-top:.3mm solid var(--tag-brand)}
+html[lang] .large-label .tag-header{border-bottom:.3mm solid var(--tag-brand)}
+html[data-output-mode="bw"] .tag-promise{color:#222}
+html[data-output-mode="bw"] .tag-promise i{color:#444}
+
+/* Monochrome uses an open price field and a deliberate hierarchy of black rules. */
+html[lang][data-output-mode="bw"] .price-tag{border-color:#888;background:#fff;color:#000}
+html[lang][data-output-mode="bw"] .price-tag.no-cut{border-color:transparent}
+html[lang][data-output-mode="bw"] .price-tag::before{width:100%;height:.65mm;background:#000}
+html[lang][data-output-mode="bw"] .price-tag::after{width:100%;height:.25mm;background:#4b4b4b}
+html[lang][data-output-mode="bw"] .tag-header{border-bottom-color:#565656}
+html[lang][data-output-mode="bw"] .tag-header::after{width:20%;left:40%;height:.65mm;background:#000}
+html[lang][data-output-mode="bw"] .tag-name,
+html[lang][data-output-mode="bw"] .tag-unit,
+html[lang][data-output-mode="bw"] .tag-price,
+html[lang][data-output-mode="bw"] .barcode-number,
+html[lang][data-output-mode="bw"] .tag-promise{color:#000}
+html[lang][data-output-mode="bw"] .tag-unit-badge{background:transparent;color:#000;border-bottom-color:#707070}
+html[lang][data-output-mode="bw"] .tag-unit-badge::after{background:#000}
+html[lang][data-output-mode="bw"] .tag-price::before{
+  background:#fff;border:0;border-top:.35mm solid #000;border-bottom:.8mm solid #000;
+}
+html[lang][data-output-mode="bw"] .tag-price::after{
+  left:0;right:auto;bottom:0;width:22%;height:1.3mm;background:#000;
+}
+html[lang][data-output-mode="bw"] .tag-footer{border-top-color:#a3a3a3}
+html[lang][data-output-mode="bw"] .tag-promise i{color:#000}
+html[lang][data-output-mode="bw"] .large-label::before{height:1.25mm}
+html[lang][data-output-mode="bw"] .large-label::after{height:.5mm}
+html[lang][data-output-mode="bw"] .large-label .tag-header{border-bottom-color:#000}
+html[lang][data-output-mode="bw"] .large-label .tag-header::after{height:1mm}
+html[lang][data-output-mode="bw"] .large-label .tag-price::before{
+  border-top-width:.5mm;border-bottom-width:1.1mm;
+}
+html[lang][data-output-mode="bw"] .large-label .tag-price::after{height:1.9mm;width:24%}
+html[lang][data-output-mode="bw"] .large-label .tag-footer{border-top-color:#000}
+html[lang][data-output-mode="bw"] .compact::before{height:.4mm}
+html[lang][data-output-mode="bw"] .compact::after{height:.2mm}
+html[lang][data-output-mode="bw"] .compact .tag-price::before{
+  border-top-width:.2mm;border-bottom-width:.4mm;
+}
+html[lang][data-output-mode="bw"] .compact .tag-price::after{height:.6mm;width:20%}

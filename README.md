@@ -1,17 +1,15 @@
-# Nozha Price Studio — Vercel migration
+# Nozha / KARAZ Price Studio
 
-## Status
-Migration is **not complete**. This repository does not contain the original app source yet. The original live website must remain unchanged.
-
-Original site: https://nozha-price-studio.alihamady345.chatgpt.site/?view=offers&lang=ar
-
-## Required for a faithful migration
-- Original source code and assets, or an authorized export of the app.
-- Database/storage export, if any (product photos, item library, offers, branch data).
-- Reference print templates with physical dimensions and logo assets.
-- Regression tests of Excel import, barcode fidelity, A3/A4/A5/A6/A7/A8 label printing, Arabic RTL, offers and magazine.
+The existing Arabic/English pricing and offers interface, assets, Excel import, barcode tools, PDF export and print layouts are deployed on Vercel without interface changes.
 
 ## Deployment
-Once the actual source is available, configure the appropriate framework preset on Vercel and connect this repository. Do not replace the live site before validation.
 
-This README documents the migration only; it is **not** a replacement implementation.
+Connect this repository to the `nozha-price-studio` Vercel project. Framework: Other; output directory: `public`; no build step or package installation required. `api/bridge.js` provides same-origin access to the existing shared catalog and offers service.
+
+## Migration status
+
+Frontend and deployment source are migrated to GitHub/Vercel. The persistent D1 database and original catalog/offer service remain on the existing Sites deployment. Keep that deployment enabled. This is a staged hosting migration, not a completed database migration. No database rows or credentials are included in this repository.
+
+`worker/`, `db/` and `drizzle/` retain the original API source and database schema for the later database migration. Before replacing the bridge, provision persistent storage, export and import all products/offers, preserve version conflict checks and atomic batches, and verify shared reads/writes before switching over.
+
+Browser-local unsaved drafts belong to the old domain and are not transferred automatically; export any such drafts before changing links.

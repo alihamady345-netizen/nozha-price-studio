@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>استوديو بطاقات الأسعار | نزهة وكرز</title>
+  <meta name="description" content="قالب موحد لبطاقات أسعار نزهة وكرز. اختر الورق والتقسيم، أدخل الأصناف ثم اطبع بالمقاس الفعلي.">
+  <meta name="theme-color" content="#142821">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23142821'/%3E%3Crect x='7' y='6' width='18' height='21' rx='2' fill='white'/%3E%3Cpath d='M10 11h12M10 15h5M10 21h12' stroke='%23b99546' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="studio-v2.css">
+  <link rel="stylesheet" href="signature.css">
+  <link rel="stylesheet" href="language.css">
+  <link rel="stylesheet" href="centered-labels.css">
+  <link rel="stylesheet" href="catalog.css">
+  <link rel="stylesheet" href="offers.css">
+  <style id="printSize">@page { size: A4 portrait; margin: 0; }</style>
+  <script defer src="assets/JsBarcode.all.min.js"></script>
+  <script defer src="assets/html2canvas.min.js"></script>
+  <script defer src="assets/jspdf.umd.min.js"></script>
+  <script defer src="i18n.js"></script>
+  <script defer src="app.js"></script>
+  <script defer src="catalog.js"></script>
+  <script defer src="export-pdf.js"></script>
+  <script defer src="assets/zxing-browser.min.js"></script>
+  <script defer src="barcode-scanner.js"></script>
+  <script defer src="assets/jszip.min.js"></script>
+  <script defer src="assets/xlsx.full.min.js"></script>
+  <script defer src="offers-xlsx.js"></script>
+  <script defer src="offer-validity.js"></script>
+  <script defer src="offers.js"></script>
+  <script defer src="offers-library.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="identity"><span class="app-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h3M9 16h6"/></svg></span><div><h1>بطاقات أسعار الفروع</h1><p>أسواق نزهة وكرز</p></div></div>
+    <div class="language-switch" role="group" aria-label="لغة الواجهة والبطاقات"><button type="button" data-language="ar" lang="ar" dir="rtl" aria-pressed="true">العربية</button><button type="button" data-language="en" lang="en" dir="ltr" aria-pressed="false">English</button></div>
+    <div class="header-brands" aria-label="نزهة وكرز"><span class="brand-art nozha-art"><img src="assets/nozha.jpg" alt="نزهة"></span><span class="brand-art karaz-art"><img src="assets/karaz.jpg" alt="كرز"></span></div>
+    <div class="output-actions"><button type="button" class="download-button" id="downloadTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M8 13h8M8 17h5"/></svg>تنزيل PDF</button><button type="button" class="print-button" id="printTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V8h16v9h-3M7 14h10v7H7zM17 11h.01"/></svg>طباعة الآن</button></div>
+  </header>
+  <main class="workspace">
+    <aside class="controls">
+      <section class="control-section">
+        <div class="section-heading"><span>٠١</span><h2>إعداد البطاقة</h2></div>
+        <label class="field-label">العلامة التجارية</label>
+        <div class="brand-switch" role="group" aria-label="العلامة التجارية">
+          <button data-brand="nozha" class="brand-option selected" aria-pressed="true"><span class="brand-art nozha-art"><img src="assets/nozha.jpg" alt="شعار نزهة الأصلي"></span><span>نزهة</span><span class="brand-check">✓</span></button>
+          <button data-brand="karaz" class="brand-option" aria-pressed="false"><span class="brand-art karaz-art"><img src="assets/karaz.jpg" alt="شعار كرز الأصلي"></span><span>كرز</span><span class="brand-check">✓</span></button>
+        </div>
+        <div class="two-fields"><label>مقاس الورق<select id="paper"><option>A4</option><option>A3</option><option>A5</option><option>A6</option></select></label><label>اتجاه الورق<select id="orientation"><option value="portrait">عمودي</option><option value="landscape">أفقي</option></select></label></div>
+        <label class="field-label" id="divisionLabel">تقسيم الورقة</label>
+        <div class="division-switch" role="group" aria-labelledby="divisionLabel">
+          <button data-count="1" aria-pressed="false"><i class="layout-icon l1"></i><span>١</span></button>
+          <button data-count="2" aria-pressed="false"><i class="layout-icon l2"></i><span>٢</span></button>
+          <button data-count="4" aria-pressed="false"><i class="layout-icon l4"></i><span>٤</span></button>
+          <button data-count="5" aria-pressed="false"><i class="layout-icon l5"></i><span>٥</span></button>
+          <button data-count="6" class="selected" aria-pressed="true"><i class="layout-icon l6"></i><span>٦</span></button>
+          <button data-count="8" aria-pressed="false"><i class="layout-icon l8"></i><span>٨</span></button>
+          <button data-count="20" aria-pressed="false"><i class="layout-icon l20"></i><span>٢٠</span></button>
+        </div>
+        <div class="dimensions"><span>مقاس البطاقة</span><strong id="cardDimensions" dir="ltr"></strong></div>
+        <label class="field-label output-mode-label" id="outputModeLabel">ألوان الورقة</label>
+        <div class="output-mode-switch" role="group" aria-labelledby="outputModeLabel"><button type="button" data-output-mode="color" class="selected" aria-pressed="true"><span class="color-mode-symbol" aria-hidden="true"></span>ملوّن</button><button type="button" data-output-mode="bw" aria-pressed="false"><span class="mono-mode-symbol" aria-hidden="true"></span>أبيض وأسود</button></div>
+        <details class="print-settings"><summary>هوامش الطباعة وخطوط القص</summary><div class="two-fields"><label>الهامش (مم)<input id="margin" type="number" min="3" max="15" step="1" value="5"></label><label>الفاصل (مم)<input id="gap" type="number" min="0" max="5" step="0.5" value="2"></label></div><label class="check-field"><input type="checkbox" id="cutLines" checked>إظهار خطوط القص</label></details>
+      </section>
+      <section class="control-section">
+        <div class="section-heading"><span>٠٢</span><h2 id="formHeading">بيانات البطاقة ١</h2></div>
+        <p class="slot-instruction">اختر مكان البطاقة، ثم اكتب صنفها.</p>
+        <div id="slotPicker" class="slot-picker" role="group" aria-label="اختيار البطاقة"></div>
+        <form id="productForm" novalidate>
+          <label>تعريف الصنف بالعربية<textarea id="productName" required maxlength="100" rows="2" placeholder="مثال: نادك حليب طازج كامل الدسم" autocomplete="off" dir="rtl"></textarea></label>
+          <label>حجم العبوة أو وحدة البيع <small>اختياري</small><input id="productUnit" maxlength="35" placeholder="مثال: ٢ لتر / الكيلو / الحبة" autocomplete="off"></label>
+          <details class="alternate-language-fields" id="alternateLanguageFields"><summary>إضافة وصف الصنف بالإنجليزية</summary><p>اكتب الوصف المقابل للطباعة باللغتين. يبقى السعر والباركود موحّدين.</p><label>تعريف الصنف بالإنجليزية<textarea id="productNameOther" maxlength="100" rows="2" placeholder="e.g. Nadec Fresh Full Fat Milk" autocomplete="off" dir="ltr"></textarea></label><label>الحجم أو الوحدة بالإنجليزية<input id="productUnitOther" maxlength="35" placeholder="e.g. 2 L / per kg / each" autocomplete="off" dir="ltr"></label></details>
+          <div class="two-fields"><label>سعر الطباعة<input id="productPrice" required inputmode="decimal" placeholder="0.00" autocomplete="off" dir="ltr" aria-describedby="saveDestinationHint"></label><label>عدد النسخ<input id="productCopies" type="number" min="1" max="1000" value="1"></label></div>
+          <div class="save-destination"><label>حفظ التعديل<select id="saveDestination" aria-describedby="saveDestinationHint"><option value="print">لهذه الطباعة فقط</option><option value="library" selected>تحديث الصنف في المكتبة</option></select></label><p id="saveDestinationHint" role="status"></p></div>
+          <label>رقم الباركود<input id="productBarcode" required maxlength="40" inputmode="numeric" placeholder="اكتب الرقم أو امسح الباركود" autocomplete="off" dir="ltr" aria-describedby="scannerHint"></label>
+          <div id="catalogMatch" class="catalog-match" role="status" hidden></div>
+          <div class="scanner-actions"><button type="button" id="scanCamera"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l2-2h4l2 2h4v15H4V5z"/><circle cx="12" cy="12" r="4"/></svg>مسح بالكاميرا</button><button type="button" id="scanDesktop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5M7 7v10M10 7v10M14 7v10M17 7v10"/></svg>قارئ الكمبيوتر</button></div>
+          <p id="scannerHint" class="scanner-hint" role="status">المسح يملأ الباركود؛ اكتب تعريف الصنف والسعر.</p>
+          <details class="barcode-settings"><summary>نوع الباركود وخيارات التكرار</summary><label>نوع الباركود<select id="barcodeType"><option value="AUTO">تلقائي</option><option value="EAN13">EAN-13</option><option value="EAN8">EAN-8</option><option value="UPC">UPC-A</option><option value="CODE128">CODE128 — أرقام الأصناف الداخلية</option></select></label><p>عند زيادة عدد النسخ، يُكرَّر الصنف في الخانات الفارغة التالية.</p></details>
+          <p class="form-error" id="formError" role="alert"></p>
+          <div class="form-actions"><button type="submit" class="primary" id="addProduct">حفظ الصنف والبطاقة</button><button type="button" class="secondary" id="cancelEdit" hidden>إلغاء</button></div>
+          <button type="button" id="removeSlot" class="text-button remove-slot" hidden>إفراغ هذه البطاقة</button>
+        </form>
+      </section>
+      <div class="template-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-4M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/></svg><span>قالب واحد لجميع الفروع<br><small>الشعار الأصلي، الاسم، السعر، الباركود</small></span></div>
+    </aside>
+    <div class="main-surface">
+      <section class="catalog-section" aria-labelledby="catalogHeading">
+        <div class="catalog-heading"><div><h2 id="catalogHeading">مكتبة الأصناف المشتركة</h2><p>ابحث عن الصنف وأضفه للطباعة دون إعادة إدخال بياناته.</p></div><button type="button" id="refreshCatalog" class="secondary">تحديث المكتبة</button></div>
+        <div class="catalog-search"><label for="catalogSearch">البحث بالاسم أو الباركود</label><div><input id="catalogSearch" type="search" maxlength="100" placeholder="اسم الصنف أو رقم الباركود" autocomplete="off"><button type="button" id="clearCatalogSearch" class="secondary">مسح البحث</button></div></div>
+        <p id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></p>
+        <div id="catalogResults" class="catalog-results"></div>
+        <div class="catalog-footer"><div class="catalog-pages"><button type="button" id="catalogPrev" class="secondary">السابق</button><span id="catalogPage"></span><button type="button" id="catalogNext" class="secondary">التالي</button></div><button type="button" id="saveSheetCatalog" class="secondary">حفظ الأصناف الجديدة في المكتبة</button></div>
+      </section>
+      <section class="preview-section" aria-labelledby="previewHeading">
+        <div class="preview-toolbar"><div><h2 id="previewHeading">ورقة الأسعار</h2><p id="previewSubtitle">كل جزء في الورقة يمكن أن يكون صنفًا مختلفًا</p></div><span class="preview-badge" id="previewBadge">٠ من ٦ بطاقات</span></div>
+        <div class="sheet-progress"><div id="sheetProgressFill"></div></div>
+        <div class="canvas-caption"><span>اضغط أي بطاقة لتعبئتها أو تعديلها</span><button type="button" id="sampleToggle" class="canvas-button">مشاهدة مثال للتصميم</button></div>
+        <div class="paper-stage"><div id="paperFrame"><div id="previewPaper"></div></div></div>
+        <div class="preview-footer"><div class="page-controls"><button id="prevPage" class="square-button" aria-label="الصفحة السابقة">‹</button><span id="pageNumber">صفحة ١ من ١</span><button id="nextPage" class="square-button" aria-label="الصفحة التالية">›</button><button id="addPage" type="button" class="new-page-button">＋ ورقة جديدة</button></div><span id="sheetSummary"></span></div>
+        <p class="print-tip"><span aria-hidden="true">ⓘ</span> عند الطباعة: اختر المقاس نفسه، ومقياس ١٠٠٪، وأوقف رؤوس الصفحات وتذييلاتها.</p>
+        <p id="layoutWarning" class="layout-warning" role="status" hidden></p>
+        <div class="sheet-output-bar"><div class="output-actions"><button type="button" class="download-button" id="downloadBottom">تنزيل PDF</button><button type="button" class="print-button" id="printBottom">طباعة الآن</button></div><p id="downloadStatus" role="status" aria-live="polite"></p></div>
+      </section>
+      <section class="products-section" aria-labelledby="productsHeading">
+        <div class="products-heading"><div><h2 id="productsHeading">بطاقات هذه الورقة <span id="productCount">٠</span></h2><p id="copiesSummary">تعبئة كل خانة مستقلة عن الأخرى</p></div><button class="text-button" id="clearAll" hidden>مسح جميع البطاقات</button></div>
+        <div id="productList"></div>
+      </section>
+    </div>
+  </main>
+  <footer class="app-footer">نزهة وكرز <span>·</span> بطاقات الأسعار الموحدة</footer>
+  <div id="printRoot" aria-hidden="true"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="scannerDialog" class="scanner-dialog" aria-labelledby="scannerTitle" aria-describedby="cameraStatus">
+    <div class="scanner-dialog-head"><div><h2 id="scannerTitle">مسح باركود الصنف</h2><p>وجّه الكاميرا إلى الخطوط وثبّت الهاتف.</p></div><button type="button" id="closeScanner" aria-label="إغلاق الكاميرا">×</button></div>
+    <div class="scanner-video-wrap"><video id="scannerVideo" autoplay muted playsinline></video><div class="scan-guide" aria-hidden="true"></div></div>
+    <p id="cameraStatus" class="camera-status" role="status" aria-live="polite">يجري فتح الكاميرا…</p>
+    <div class="camera-controls"><label id="cameraChoice" hidden>الكاميرا<select id="cameraSelect"></select></label><button type="button" id="retryScanner" class="secondary" hidden>إعادة المحاولة</button><button type="button" id="cancelScanner" class="secondary">إلغاء</button></div>
+  </dialog>
+</body>
+</html>

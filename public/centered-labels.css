@@ -18,12 +18,15 @@ html[lang] .large-label .tag-name[lang="ar"] .tag-name-line,
 html[lang] .large-label .tag-unit[lang="ar"] .tag-unit-badge{line-height:normal}
 html[lang] .tag-name[lang="ar"],html[lang] .tag-unit[lang="ar"],html[lang] .tag-promise{font-family:Arabic,Arial,sans-serif}
 html[lang] .tag-name[lang="en"],html[lang] .tag-unit[lang="en"]{font-family:Arial,Arabic,sans-serif}
-/* The pack size uses a text-width underline instead of an enclosing box. */
-html[lang] .tag-unit,html[lang] .compact .tag-unit{display:block;width:78%;max-width:78%;text-align:center;border:0;background:transparent;color:var(--tag-unit-color);padding:0;margin:var(--unit-margin) 0 0 22%;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
-html[lang] .tag-unit-badge{position:relative;display:inline-block;box-sizing:border-box;max-width:100%;min-width:0;border:0;border-bottom:.18mm solid var(--tag-secondary);padding:0 .12em .16em;background:transparent;font-weight:700;line-height:1.3;vertical-align:top;overflow-wrap:anywhere}
-html[lang] .tag-unit-badge::after{content:'';position:absolute;left:25%;right:25%;bottom:0;height:.4mm;background:var(--tag-unit-color);pointer-events:none}
-html[lang] .compact .tag-unit-badge{border-bottom-width:.12mm;padding-bottom:.12em}
-html[lang] .compact .tag-unit-badge::after{height:.25mm}
+/* A restrained unit medallion, sized in physical units for every print format. */
+html[lang] .tag-unit,html[lang] .compact .tag-unit{display:block;width:100%;max-width:100%;text-align:center;border:0;background:transparent;color:var(--tag-unit-color);padding:0;margin:var(--unit-margin) 0 0;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+html[lang] .tag-unit-badge{position:relative;display:inline-block;box-sizing:border-box;max-width:76%;min-width:3.3em;border:.2mm solid var(--tag-brand);border-radius:.65em;padding:.04em .65em .08em;background:var(--tag-soft);color:var(--tag-unit-color);font-weight:700;line-height:1.3;vertical-align:top;overflow-wrap:anywhere}
+html[lang] .tag-unit-badge::before,html[lang] .tag-unit-badge::after{content:'';position:absolute;top:50%;width:.8em;height:.25mm;background:var(--tag-secondary);transform:translateY(-50%);pointer-events:none}
+html[lang] .tag-unit-badge::before{right:calc(100% + .25em)}
+html[lang] .tag-unit-badge::after{left:calc(100% + .25em)}
+html[lang] .large-label .tag-unit{font-size:calc(var(--unit-size) * 1.15);margin-top:calc(var(--unit-margin) + 1mm)}
+html[lang] .compact .tag-unit-badge{min-width:2.8em;border-width:.12mm;border-radius:.4em;padding:0 .45em .05em}
+html[lang] .compact .tag-unit-badge::before,html[lang] .compact .tag-unit-badge::after{height:.15mm;width:.6em}
 html[lang] .tag-price,html[lang] .compact .tag-price{position:relative;z-index:0;display:block;width:100%;max-width:100%;min-width:0;min-height:0;text-align:center;background:transparent;color:#101b15;border:0;border-radius:0;padding:0;margin:var(--price-margin) 0 0;line-height:1.1;letter-spacing:0;font-family:Arial,sans-serif;font-weight:700;direction:ltr;white-space:nowrap}
 /* Open horizontal rules keep the amount prominent without enclosing it in a box. */
 html[lang] .tag-price::before{content:'';position:absolute;z-index:-1;inset:0;background:#fff;border:0;border-top:.3mm solid var(--tag-brand);border-bottom:.7mm solid var(--tag-brand);border-radius:0;transform:none;pointer-events:none}
@@ -87,8 +90,8 @@ html[lang][data-output-mode="bw"] .tag-unit,
 html[lang][data-output-mode="bw"] .tag-price,
 html[lang][data-output-mode="bw"] .barcode-number,
 html[lang][data-output-mode="bw"] .tag-promise{color:#000}
-html[lang][data-output-mode="bw"] .tag-unit-badge{background:transparent;color:#000;border-bottom-color:#707070}
-html[lang][data-output-mode="bw"] .tag-unit-badge::after{background:#000}
+html[lang][data-output-mode="bw"] .tag-unit-badge{background:#fff;color:#000;border-color:#707070}
+html[lang][data-output-mode="bw"] .tag-unit-badge::before,html[lang][data-output-mode="bw"] .tag-unit-badge::after{background:#000}
 html[lang][data-output-mode="bw"] .tag-price::before{
   background:#fff;border:0;border-top:.35mm solid #000;border-bottom:.8mm solid #000;
 }

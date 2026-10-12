@@ -124,3 +124,12 @@
 #offerSelectionStatus{font-weight:700}
 
 .offer-all-sizes select{width:160px}
+
+/* Twenty offer labels on portrait A4: four columns by five rows. */
+.offer-stock-diagram[data-cells="20"]{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(5,1fr)}
+.offer-stock-diagram[data-cells="20"] i{padding:1px}
+.offer-stock-diagram[data-cells="20"] i span{display:none}
+.offer-stock-diagram[data-cells="20"] i b{font-size:5px;margin:auto}
+.offer-paper[data-output=full][data-paper=A4_20] .offer-name{top:80%}
+.offer-paper[data-output=full][data-paper=A4_20] .offer-identifier{top:88.8%}
+.offer-paper[data-output=full][data-paper=A4_20] .offer-expiry{top:90.75%}

@@ -313,7 +313,7 @@
     const current=test?printPlan(data.group).pages[data.page]:null,checkGroup=current?.key||group;
     if(busy||!await window.offerLibrary?.checkPrint(checkGroup)){closePending();return;}
     await document.fonts.ready;if(!preparePrint(test,test?'':group)){closePending();return;}
-    if(!forPrint)printReturnPending=true;
+    if(!forPrint||!printWindow)printReturnPending=true;
     busy=true;updateButtons();const printRoot=byId('printRoot'),style=printRoot.getAttribute('style'),buttons=Array.from(document.querySelectorAll('button,input,select,textarea')).map(el=>[el,el.disabled]);const mainInert=root.inert,priceInert=document.querySelector('.workspace').inert;root.inert=true;document.querySelector('.workspace').inert=true;document.body.classList.add('exporting');for(const [el]of buttons)el.disabled=true;
     try{const Pdf=window.jspdf?.jsPDF;if(!Pdf||!window.html2canvas)throw new Error('PDF unavailable');const pages=Array.from(printRoot.children),first=geometry(pages[0].dataset.paper,Number(pages[0].dataset.count));Object.assign(printRoot.style,{display:'block',position:'fixed',left:'0',top:'0',zIndex:'-1',pointerEvents:'none'});await Promise.all(Array.from(printRoot.querySelectorAll('svg image,img.riyal-symbol')).map(async img=>{const attr=img.tagName.toLowerCase()==='img'?'src':'href',url=img.getAttribute(attr);if(url&&!url.startsWith('data:'))img.setAttribute(attr,await pdfAssetDataUrl(url));}));
       const size=pages[0].dataset.paper;const pdf=new Pdf({unit:'mm',format:[first.w,first.h],orientation:first.w>first.h?'landscape':'portrait',compress:true});pdf.setProperties({title:`Offers ${size} - ${pages.length} sheets - ${data.brand==='nozha'?'Nozha':'Karaz'}`,creator:'',author:''});

@@ -31,7 +31,7 @@ async function downloadPricePdf(){
     const Pdf=window.jspdf?.jsPDF;
     if(!Pdf||typeof window.html2canvas!=='function')throw new Error(tr('تعذر تحميل خيار التنزيل. أعد تحميل الصفحة.'));
     const pages=Array.from(root.children),width=currentLayout.w,height=currentLayout.h,mono=state.outputMode==='bw';
-    const filename=state.language==='en'?`Price_labels_${state.brand==='nozha'?'Nozha':'Karaz'}_${state.paper}_EN_${mono?'BW':'Color'}.pdf`:`بطاقات_${state.brand==='nozha'?'نزهة':'كرز'}_${state.paper}_AR_${mono?'أبيض_وأسود':'ملون'}.pdf`;
+    const filename=state.language==='en'?`Price_labels_${state.brand==='nozha'?'Nozha':'Karaz'}_${state.paper}_${state.count}-labels_EN_${mono?'BW':'Color'}.pdf`:`بطاقات_${state.brand==='nozha'?'نزهة':'كرز'}_${state.paper}_${state.count}-صنف_AR_${mono?'أبيض_وأسود':'ملون'}.pdf`;
     document.body.classList.add('exporting');
     originalInert=main.inert;main.inert=true;
     snapshot=Array.from(document.querySelectorAll('button,input,select,textarea')).map(element=>[element,element.disabled]);

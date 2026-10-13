@@ -321,8 +321,8 @@
         const capture=target=>window.html2canvas(target,{scale:300/96,backgroundColor:'#ffffff',useCORS:true,logging:false,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,Math.ceil(g.w*96/25.4)),windowHeight:Math.max(document.documentElement.clientHeight,Math.ceil(g.h*96/25.4)),onclone(clone){clone.getElementById('printRoot').style.zIndex='0';}});
         const addImage=(canvas,x,y,w,h)=>{if(!canvas.width||!canvas.height)throw new Error('Empty canvas');if(data.mono)grayscaleCanvas(canvas);pdf.addImage(canvas,'PNG',x,y,w,h,undefined,'FAST');canvas.width=1;canvas.height=1;};
         if(i)pdf.addPage([g.w,g.h],orientation);
-        if(page.dataset.paper==='A6'){
-          // Rasterize every A6 label at the same origin, then place it in millimetres.
+        if(['A5','A6'].includes(page.dataset.paper)){
+          // Rasterize each A5/A6 label at the same origin, then place it in millimetres.
           // This keeps lower-row text independent of grid/transform rasterization.
           const cards=Array.from(page.children);
           for(let cell=0;cell<cards.length;cell++){
@@ -331,7 +331,7 @@
             finally{if(savedStyle===null)card.removeAttribute('style');else card.setAttribute('style',savedStyle);}
           }
         }else addImage(await capture(page),0,0,g.w,g.h);
-      }await window.OfferValidity.sync();if(pages.some(page=>Array.from(page.querySelectorAll('.offer-card:not(.is-blank)')).some(card=>!window.OfferValidity.canPrint({start:card.dataset.start,expiry:card.dataset.expiry}))))throw new Error('offer_expired_during_export');const filename=`Offers_${data.brand==='nozha'?'Nozha':'Karaz'}_${size}_${pages.length}-sheets_${modelFilename()}_${state.language}.pdf`;
+      }await window.OfferValidity.sync();if(pages.some(page=>Array.from(page.querySelectorAll('.offer-card:not(.is-blank)')).some(card=>!window.OfferValidity.canPrint({start:card.dataset.start,expiry:card.dataset.expiry}))))throw new Error('offer_expired_during_export');const filename=`Offers_${data.brand==='nozha'?'Nozha':'Karaz'}_${size}_${pages.length}-sheets_${modelFilename()}_${state.language}_layout-20261013b.pdf`;
       if(forPrint&&printWindow&&!printWindow.closed){
         const blobUrl=URL.createObjectURL(pdf.output('blob'));printWindow.location.replace(blobUrl);printWindow=null;setTimeout(()=>URL.revokeObjectURL(blobUrl),600000);
         byId('offerExportStatus').textContent=state.language==='en'?`The ${size} PDF is open (${pages.length} sheets). Use the printer icon in the PDF.`:`تم فتح ملف ${size} (${pages.length} ورقة). اضغط رمز الطابعة داخل ملف PDF.`;

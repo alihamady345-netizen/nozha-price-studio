@@ -138,6 +138,6 @@
 .offer-paper[data-paper=A5][data-mono=false] .offer-old-price{top:7%;height:15%}
 .offer-paper[data-paper=A5][data-mono=false] .offer-new-price{top:60.5%;height:16%}
 
-/* A6 data uses physical offsets without transformed text containers. */
-.offer-paper[data-paper=A6] .offer-data{inset:auto;left:var(--offer-offset-x);top:var(--offer-offset-y);width:100%;height:100%;transform:none}
-.offer-paper[data-paper=A6] .offer-price-fraction{position:relative;top:-.18em;transform:none}
+/* A5/A6 data uses physical offsets without transformed text containers. */
+.offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-data{inset:auto;left:var(--offer-offset-x);top:var(--offer-offset-y);width:100%;height:100%;transform:none}
+.offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-price-fraction{position:relative;top:-.18em;transform:none}

@@ -142,7 +142,7 @@
 .offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-data{inset:auto;left:var(--offer-offset-x);top:var(--offer-offset-y);width:100%;height:100%;transform:none}
 .offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-price-fraction{position:relative;top:-.18em;transform:none}
 
-/* Leave a clear gap above the tax line already printed on A5 stock. */
-.offer-paper[data-paper=A5] .offer-name{top:80%;height:7%}
-.offer-paper[data-paper=A5] .offer-identifier{top:87%;height:1.4%}
-.offer-paper[data-paper=A5] .offer-expiry{top:89.2%;height:3%}
+/* Leave a clear gap above the tax line already printed on A5/A6 stock. */
+.offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-name{top:80%;height:7%}
+.offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-identifier{top:87%;height:1.4%}
+.offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-expiry{top:89.2%;height:3%}

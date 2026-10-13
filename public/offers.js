@@ -229,7 +229,7 @@
 
   function widthOf(s,size,font='Arabic'){if(measureContext){measureContext.font=`700 ${size*96/25.4}px ${font}`;return measureContext.measureText(s).width*25.4/96;}return [...s].length*size*.55;}
   function nameLines(name,maxWidth,size){const words=latinDigits(name).split(/\s+/).filter(Boolean),lines=[];let line='';const font=/[\u0600-\u06ff]/.test(name)?'Arabic':'Arial';for(const word of words){const next=line?line+' '+word:word;if(line&&widthOf(next,size,font)>maxWidth){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);return lines;}
-  function sizes(item,g){const a5=g.count===2,a5Color=a5&&!data.mono;let nameSize=Math.min(g.cw*.072,g.ch*.032),priceSize=Math.min(g.cw*.32,g.ch*.12),oldSize=Math.min(g.cw*.16,g.ch*.066);const name=state.language==='en'?(item.nameEn||item.name):(item.name||item.nameEn),maxWidth=g.cw*.92,maxHeight=g.ch*(a5?.07:.08);if(a5Color){priceSize*=1.10;oldSize*=1.15;}let lines=nameLines(name,maxWidth,nameSize);
+  function sizes(item,g){const a5=g.count===2,clearFooter=[2,4].includes(g.count),a5Color=a5&&!data.mono;let nameSize=Math.min(g.cw*.072,g.ch*.032),priceSize=Math.min(g.cw*.32,g.ch*.12),oldSize=Math.min(g.cw*.16,g.ch*.066);const name=state.language==='en'?(item.nameEn||item.name):(item.name||item.nameEn),maxWidth=g.cw*.92,maxHeight=g.ch*(clearFooter?.07:.08);if(a5Color){priceSize*=1.10;oldSize*=1.15;}let lines=nameLines(name,maxWidth,nameSize);
     while(nameSize>2&&(lines.length*nameSize*1.26>maxHeight||lines.some(s=>widthOf(s,nameSize,/[\u0600-\u06ff]/.test(name)?'Arabic':'Arial')>maxWidth))){nameSize-=.15;lines=nameLines(name,maxWidth,nameSize);}
     while(priceSize>4&&priceWidth(item.price||'',priceSize)>g.cw*.50)priceSize-=.2;
     while(oldSize>2&&widthOf(item.oldPrice||'',oldSize,'Arial')>g.cw*.29)oldSize-=.15;
@@ -243,11 +243,11 @@
     const limitSize=Math.min(limitBase,limitWidth/Math.max(1,widthOf(limit,limitBase,dirFont)/limitBase),limitWidth/Math.max(1,widthOf(state.language==='en'?'Customer limit':'الحد الأقصى',limitBase*.75,dirFont)/limitBase));
     const compact=whitePaper()&&g.count>=16;
     const codeSize=Math.max(1.4,g.ch*.008),font=/[\u0600-\u06ff]/.test(name)?'Arabic':'Arial';
-    const fields=[{x:g.cw*.48,y:g.ch*(a5Color?.685:.695),w:priceWidth(item.price||'',priceSize),h:priceSize*1.1},...lines.map((line,i)=>({x:g.cw*.5,y:g.ch*(a5?.835:compact?.84:.85)+(i-(lines.length-1)/2)*nameSize*1.26,w:widthOf(line,nameSize,font),h:nameSize*1.26}))];
+    const fields=[{x:g.cw*.48,y:g.ch*(a5Color?.685:.695),w:priceWidth(item.price||'',priceSize),h:priceSize*1.1},...lines.map((line,i)=>({x:g.cw*.5,y:g.ch*(clearFooter?.835:compact?.84:.85)+(i-(lines.length-1)/2)*nameSize*1.26,w:widthOf(line,nameSize,font),h:nameSize*1.26}))];
     if(item.oldPrice)fields.push({x:g.cw*.785,y:g.ch*.145,w:widthOf(item.oldPrice,oldSize,'Arial'),h:oldSize*1.1});
     if(item.unit)fields.push({x:g.cw*.48,y:g.ch*.785,w:widthOf(item.unit,actualUnit),h:actualUnit*1.3});
-    if(item.barcode)fields.push({x:g.cw*.5,y:g.ch*(a5?.877:compact?.895:.900),w:widthOf(item.barcode,codeSize,'Arial'),h:codeSize*1.1});
-    if(item.start||item.expiry)fields.push({x:g.cw*.5,y:g.ch*(a5?.907:compact?.925:.9325),w:dateWidth*periodSize/periodBase,h:periodSize*1.2});
+    if(item.barcode)fields.push({x:g.cw*.5,y:g.ch*(clearFooter?.877:compact?.895:.900),w:widthOf(item.barcode,codeSize,'Arial'),h:codeSize*1.1});
+    if(item.start||item.expiry)fields.push({x:g.cw*.5,y:g.ch*(clearFooter?.907:compact?.925:.9325),w:dateWidth*periodSize/periodBase,h:periodSize*1.2});
     fields.push({x:g.cw*.86,y:g.ch*.741,w:widthOf(limit,limitSize,dirFont),h:limitSize*2.3});
     if(fields.some(f=>f.x+data.offsetX-f.w/2<-.1||f.x+data.offsetX+f.w/2>g.cw+.1||f.y+data.offsetY-f.h/2<-.1||f.y+data.offsetY+f.h/2>g.ch+.1))layoutIssue=t('المحاذاة تُخرج البيانات خارج البطاقة. قلّل الإزاحة.');
     return {nameSize,priceSize,oldSize,unitSize:actualUnit,periodSize,limitSize,lines,name};
@@ -331,7 +331,7 @@
             finally{if(savedStyle===null)card.removeAttribute('style');else card.setAttribute('style',savedStyle);}
           }
         }else addImage(await capture(page),0,0,g.w,g.h);
-      }await window.OfferValidity.sync();if(pages.some(page=>Array.from(page.querySelectorAll('.offer-card:not(.is-blank)')).some(card=>!window.OfferValidity.canPrint({start:card.dataset.start,expiry:card.dataset.expiry}))))throw new Error('offer_expired_during_export');const filename=`Offers_${data.brand==='nozha'?'Nozha':'Karaz'}_${size}_${pages.length}-sheets_${modelFilename()}_${state.language}_layout-20261013c.pdf`;
+      }await window.OfferValidity.sync();if(pages.some(page=>Array.from(page.querySelectorAll('.offer-card:not(.is-blank)')).some(card=>!window.OfferValidity.canPrint({start:card.dataset.start,expiry:card.dataset.expiry}))))throw new Error('offer_expired_during_export');const filename=`Offers_${data.brand==='nozha'?'Nozha':'Karaz'}_${size}_${pages.length}-sheets_${modelFilename()}_${state.language}_layout-20261013d.pdf`;
       if(forPrint&&printWindow&&!printWindow.closed){
         const blobUrl=URL.createObjectURL(pdf.output('blob'));printWindow.location.replace(blobUrl);printWindow=null;setTimeout(()=>URL.revokeObjectURL(blobUrl),600000);
         byId('offerExportStatus').textContent=state.language==='en'?`The ${size} PDF is open (${pages.length} sheets). Use the printer icon in the PDF.`:`تم فتح ملف ${size} (${pages.length} ورقة). اضغط رمز الطابعة داخل ملف PDF.`;

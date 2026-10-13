@@ -115,3 +115,7 @@ html[lang][data-output-mode="bw"] .compact .tag-price::before{
   border-top-width:.2mm;border-bottom-width:.4mm;
 }
 html[lang][data-output-mode="bw"] .compact .tag-price::after{height:.6mm;width:20%}
+
+/* Regular-price A4 layouts: 12 and 16 independently editable labels. */
+.l12{background:repeating-linear-gradient(90deg,transparent 0 6.3px,currentColor 6.3px 7.3px),repeating-linear-gradient(0deg,transparent 0 5px,currentColor 5px 6px)}
+.l16{background:repeating-linear-gradient(90deg,transparent 0 4.5px,currentColor 4.5px 5.5px),repeating-linear-gradient(0deg,transparent 0 5px,currentColor 5px 6px)}

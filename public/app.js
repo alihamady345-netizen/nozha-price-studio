@@ -21,6 +21,8 @@ function getLayout(settings=state){
   if(settings.count===5){cols=1;rows=5;}
   if(settings.count===6){cols=settings.orientation==='landscape'?3:2;rows=settings.orientation==='landscape'?2:3;}
   if(settings.count===8){cols=settings.orientation==='landscape'?4:2;rows=settings.orientation==='landscape'?2:4;}
+  if(settings.count===12){cols=settings.orientation==='landscape'?4:3;rows=settings.orientation==='landscape'?3:4;}
+  if(settings.count===16){cols=4;rows=4;}
   if(settings.count===20){cols=settings.orientation==='landscape'?5:4;rows=settings.orientation==='landscape'?4:5;}
   const cw=(w-2*settings.margin-(cols-1)*settings.gap)/cols;
   const ch=(h-2*settings.margin-(rows-1)*settings.gap)/rows;

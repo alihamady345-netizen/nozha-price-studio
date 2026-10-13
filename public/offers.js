@@ -318,7 +318,19 @@
     try{const Pdf=window.jspdf?.jsPDF;if(!Pdf||!window.html2canvas)throw new Error('PDF unavailable');const pages=Array.from(printRoot.children),first=geometry(pages[0].dataset.paper,Number(pages[0].dataset.count));Object.assign(printRoot.style,{display:'block',position:'fixed',left:'0',top:'0',zIndex:'-1',pointerEvents:'none'});await Promise.all(Array.from(printRoot.querySelectorAll('svg image,img.riyal-symbol')).map(async img=>{const attr=img.tagName.toLowerCase()==='img'?'src':'href',url=img.getAttribute(attr);if(url&&!url.startsWith('data:'))img.setAttribute(attr,await pdfAssetDataUrl(url));}));
       const size=pages[0].dataset.paper;const pdf=new Pdf({unit:'mm',format:[first.w,first.h],orientation:first.w>first.h?'landscape':'portrait',compress:true});pdf.setProperties({title:`Offers ${size} - ${pages.length} sheets - ${data.brand==='nozha'?'Nozha':'Karaz'}`,creator:'',author:''});
       for(let i=0;i<pages.length;i++){byId('offerExportStatus').textContent=state.language==='en'?`Preparing sheet ${i+1} of ${pages.length}…`:`تجهيز الورقة ${i+1} من ${pages.length}…`;for(const p of pages)p.style.display='none';const page=pages[i],g=geometry(page.dataset.paper,Number(page.dataset.count)),orientation=g.w>g.h?'landscape':'portrait';page.style.display='grid';
-        const canvas=await window.html2canvas(page,{scale:300/96,backgroundColor:'#ffffff',useCORS:true,logging:false,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,Math.ceil(g.w*96/25.4)),windowHeight:Math.max(document.documentElement.clientHeight,Math.ceil(g.h*96/25.4)),onclone(clone){clone.getElementById('printRoot').style.zIndex='0';}});if(!canvas.width||!canvas.height)throw new Error('Empty canvas');if(data.mono)grayscaleCanvas(canvas);if(i)pdf.addPage([g.w,g.h],orientation);pdf.addImage(canvas,'PNG',0,0,g.w,g.h,undefined,'FAST');canvas.width=1;canvas.height=1;
+        const capture=target=>window.html2canvas(target,{scale:300/96,backgroundColor:'#ffffff',useCORS:true,logging:false,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,Math.ceil(g.w*96/25.4)),windowHeight:Math.max(document.documentElement.clientHeight,Math.ceil(g.h*96/25.4)),onclone(clone){clone.getElementById('printRoot').style.zIndex='0';}});
+        const addImage=(canvas,x,y,w,h)=>{if(!canvas.width||!canvas.height)throw new Error('Empty canvas');if(data.mono)grayscaleCanvas(canvas);pdf.addImage(canvas,'PNG',x,y,w,h,undefined,'FAST');canvas.width=1;canvas.height=1;};
+        if(i)pdf.addPage([g.w,g.h],orientation);
+        if(page.dataset.paper==='A6'){
+          // Rasterize every A6 label at the same origin, then place it in millimetres.
+          // This keeps lower-row text independent of grid/transform rasterization.
+          const cards=Array.from(page.children);
+          for(let cell=0;cell<cards.length;cell++){
+            const card=cards[cell],savedStyle=card.getAttribute('style');
+            try{Object.assign(card.style,{position:'absolute',left:'0',top:'0',width:g.cw+'mm',height:g.ch+'mm'});addImage(await capture(card),(cell%g.cols)*g.cw,Math.floor(cell/g.cols)*g.ch,g.cw,g.ch);}
+            finally{if(savedStyle===null)card.removeAttribute('style');else card.setAttribute('style',savedStyle);}
+          }
+        }else addImage(await capture(page),0,0,g.w,g.h);
       }await window.OfferValidity.sync();if(pages.some(page=>Array.from(page.querySelectorAll('.offer-card:not(.is-blank)')).some(card=>!window.OfferValidity.canPrint({start:card.dataset.start,expiry:card.dataset.expiry}))))throw new Error('offer_expired_during_export');const filename=`Offers_${data.brand==='nozha'?'Nozha':'Karaz'}_${size}_${pages.length}-sheets_${modelFilename()}_${state.language}.pdf`;
       if(forPrint&&printWindow&&!printWindow.closed){
         const blobUrl=URL.createObjectURL(pdf.output('blob'));printWindow.location.replace(blobUrl);printWindow=null;setTimeout(()=>URL.revokeObjectURL(blobUrl),600000);

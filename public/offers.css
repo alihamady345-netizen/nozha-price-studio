@@ -146,3 +146,9 @@
 .offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-name{top:80%;height:7%}
 .offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-identifier{top:87%;height:1.4%}
 .offer-paper:is([data-paper=A5],[data-paper=A6]) .offer-expiry{top:89.2%;height:3%}
+
+/* A6: keep the price clear of the offer band, with separate text rows below. */
+.offer-paper[data-paper=A6] .offer-new-price{top:65%;height:14%}
+.offer-paper[data-paper=A6] .offer-unit{top:78.5%;height:2.5%;line-height:1.1}
+.offer-paper[data-paper=A6] .offer-name{top:81.5%;height:5.5%}
+.offer-paper[data-paper=A6] .offer-identifier{top:87.5%;height:1.4%}

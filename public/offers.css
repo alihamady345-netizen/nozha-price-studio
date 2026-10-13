@@ -133,3 +133,7 @@
 .offer-paper[data-output=full][data-paper=A4_20] .offer-name{top:80%}
 .offer-paper[data-output=full][data-paper=A4_20] .offer-identifier{top:88.8%}
 .offer-paper[data-output=full][data-paper=A4_20] .offer-expiry{top:90.75%}
+
+/* A5 colour stock: larger prices with clearance below the offer band. */
+.offer-paper[data-paper=A5][data-mono=false] .offer-old-price{top:7%;height:15%}
+.offer-paper[data-paper=A5][data-mono=false] .offer-new-price{top:60.5%;height:16%}

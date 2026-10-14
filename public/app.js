@@ -291,14 +291,17 @@ function balanceName(name){
 
 function checkFit(){
   for(const tag of $('previewPaper').querySelectorAll('.price-tag:not(.empty-preview)')){
-    const name=tag.querySelector('.tag-name'),product=tag.querySelector('.tag-product'),body=tag.querySelector('.tag-content-inner'),price=tag.querySelector('.tag-price'),inner=tag.querySelector('.tag-price-inner'),l=currentLayout;
+    const name=tag.querySelector('.tag-name'),product=tag.querySelector('.tag-product'),body=tag.querySelector('.tag-content-inner'),price=tag.querySelector('.tag-price'),inner=tag.querySelector('.tag-price-inner'),content=tag.querySelector('.tag-content'),l=currentLayout;
     let font=l.nameSize;
     const minimum=l.compact?2.8:l.ch<75?3.2:3.5;
     if(body.scrollHeight){body.style.top='0';body.style.transform='none';}
     product.style.height='auto';product.style.paddingTop='0';product.style.paddingBottom='0';price.style.fontSize=l.priceSize+'mm';
     name.style.fontSize=font+'mm';balanceName(name);
-    const tooTall=()=>body.scrollHeight>l.contentH*96/25.4+2||tag.scrollHeight>tag.clientHeight+2;
-    const nameDominates=()=>l.ch>=120&&name.offsetHeight>l.contentH*96/25.4*.46;
+    // Large posters reserve the rendered header and barcode footer first.
+    // Measure the actual content box rather than a theoretical font height.
+    const availableH=content.clientHeight;
+    const tooTall=()=>body.scrollHeight>availableH+2||tag.scrollHeight>tag.clientHeight+2;
+    const nameDominates=()=>l.ch>=120&&name.offsetHeight>availableH*.46;
     let priceFont=l.priceSize;
     const minimumPrice=l.compact?5:6;
     // Reserve equal edge clearance before shifting the amount slightly right.
@@ -314,7 +317,7 @@ function checkFit(){
     while(tooTall()&&font>minimum)shrinkName();
     while(tooTall()&&priceFont>minimumPrice)shrinkPrice(minimumPrice);
     // Use measured physical space for the centered group in preview, PDF, and print.
-    if(body.scrollHeight){body.style.top=Math.max(0,(l.contentH*96/25.4-body.scrollHeight)/2)*25.4/96+'mm';body.style.transform='none';}
+    if(body.scrollHeight){body.style.top=Math.max(0,(availableH-body.scrollHeight)/2)*25.4/96+'mm';body.style.transform='none';}
     if(tooTall()||product.scrollHeight>product.clientHeight+2||inner.scrollWidth>priceWidth()+2){
       addIssue(tr('تعريف الصنف أو السعر لا يتسع لهذا المقاس. اختر ورقًا أكبر أو عدد بطاقات أقل؛ لن تُطبع بيانات مقصوصة.'));
     }
@@ -325,7 +328,7 @@ function checkFit(){
 function alignSheetPrices(){
   const l=currentLayout,pxPerMm=96/25.4;
   const parts=Array.from($('previewPaper').querySelectorAll('.price-tag:not(.empty-preview)')).map(tag=>({
-    tag,product:tag.querySelector('.tag-product'),price:tag.querySelector('.tag-price'),body:tag.querySelector('.tag-content-inner')
+    tag,product:tag.querySelector('.tag-product'),price:tag.querySelector('.tag-price'),body:tag.querySelector('.tag-content-inner'),content:tag.querySelector('.tag-content')
   }));
   if(parts.length<2||parts.some(p=>!p.product.offsetHeight||!p.price.offsetHeight))return;
   // A sheet uses one price size and one price position, even with mixed name lengths.
@@ -333,7 +336,7 @@ function alignSheetPrices(){
   parts.forEach(p=>p.price.style.fontSize=font+'mm');
   const productH=Math.max(...parts.map(p=>p.product.offsetHeight));
   const priceH=Math.max(...parts.map(p=>p.price.offsetHeight));
-  const groupH=productH+priceH+l.priceMargin*pxPerMm,contentH=l.contentH*pxPerMm;
+  const groupH=productH+priceH+l.priceMargin*pxPerMm,contentH=Math.min(...parts.map(p=>p.content.clientHeight));
   if(groupH>contentH+2){addIssue(tr('تعريف الصنف أو السعر لا يتسع لهذا المقاس. اختر ورقًا أكبر أو عدد بطاقات أقل؛ لن تُطبع بيانات مقصوصة.'));return;}
   const start=Math.max(0,(contentH-groupH)/2);
   for(const p of parts){

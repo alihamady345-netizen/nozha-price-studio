@@ -345,6 +345,7 @@ function alignSheetPrices(){
 }
 
 function showLayoutIssues(){
+  if(window.designStudio?.active){window.designStudio.syncButtons();return;}
   $('layoutWarning').hidden=!lastIssues.length;$('layoutWarning').textContent=lastIssues.join(' ');
   const disabled=!filledCount()||!!lastIssues.length||pendingDraftIndexes().length>0||state.sample||formSaving||document.body.classList.contains('exporting');
   for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=disabled;
@@ -486,6 +487,7 @@ document.querySelectorAll('[data-language]').forEach(button=>button.addEventList
 }));
 
 function preparePrint(){
+  if(window.designStudio?.active)return window.designStudio.preparePrint();
   if(window.offerStudio?.active)return window.offerStudio.preparePrint();
   const root=$('printRoot');
   if(!filledCount()||pendingDraftIndexes().length||formSaving){root.replaceChildren();return false;}

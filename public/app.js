@@ -297,6 +297,10 @@ function checkFit(){
     if(body.scrollHeight){body.style.top='0';body.style.transform='none';}
     product.style.height='auto';product.style.paddingTop='0';product.style.paddingBottom='0';price.style.fontSize=l.priceSize+'mm';
     name.style.fontSize=font+'mm';balanceName(name);
+    // Reserve the font's painted overflow inside the product group before fitting.
+    // A short line box on another platform must not trigger a false clipping alert.
+    const reserveProductInk=()=>{if(!l.large)return;product.style.height='auto';product.style.height=Math.ceil(Math.max(product.scrollHeight,product.offsetHeight))*25.4/96+'mm';};
+    reserveProductInk();
     // Large posters reserve the rendered header and barcode footer first.
     // Measure the actual content box rather than a theoretical font height.
     const availableH=content.clientHeight;
@@ -307,7 +311,7 @@ function checkFit(){
     // Reserve equal edge clearance before shifting the amount slightly right.
     const priceWidth=()=>Math.max(0,price.clientWidth-2*l.priceShift*96/25.4);
     const shrinkPrice=floor=>{priceFont=Math.max(floor,priceFont-.5);price.style.fontSize=priceFont+'mm';};
-    const shrinkName=()=>{font=Math.max(minimum,font-.15);name.style.fontSize=font+'mm';balanceName(name);};
+    const shrinkName=()=>{font=Math.max(minimum,font-.15);name.style.fontSize=font+'mm';balanceName(name);reserveProductInk();};
     // Fit the price width first; a wide number must not needlessly shrink the name.
     while(inner.scrollWidth>priceWidth()+1&&priceFont>minimumPrice)shrinkPrice(minimumPrice);
     while((nameDominates()||name.scrollWidth>name.clientWidth+1)&&font>minimum)shrinkName();

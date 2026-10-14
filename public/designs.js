@@ -28,12 +28,12 @@
   function fit(page){
     let fits=true;
     for(const n of page.querySelectorAll('.company-name')){
-      const text=(n.dataset.companyText||n.textContent).replace(/\s+/gu,' ').trim(),probe=document.createElement('span');
-      Object.assign(probe.style,{position:'absolute',visibility:'hidden',whiteSpace:'nowrap',fontFamily:'Arabic, Arial, sans-serif',fontWeight:data.writing==='elegant'?'400':'700'});document.body.append(probe);
-      const setSize=size=>{n.style.fontSize=size+'mm';probe.style.fontSize=size+'mm';const measure=value=>{probe.textContent=value;return probe.offsetWidth;};const lines=balancedNameLines(text,n.parentElement.clientWidth*.95,measure,1);n.replaceChildren(...lines.map(line=>{const span=document.createElement('span');span.className='company-name-line';span.textContent=line;return span;}));};
+      const text=(n.dataset.companyText||n.textContent).replace(/\s+/gu,' ').trim(),measureCanvas=document.createElement('canvas'),context=measureCanvas.getContext('2d');
+      
+      const setSize=size=>{n.style.fontSize=size+'mm';context.font=(data.writing==='elegant'?'400':'700')+' '+(size*96/25.4)+'px Arabic, Arial, sans-serif';const measure=value=>context.measureText(value).width;const lines=balancedNameLines(text,n.parentElement.clientWidth*.95,measure,1);n.replaceChildren(...lines.map(line=>{const span=document.createElement('span');span.className='company-name-line';span.textContent=line;return span;}));};
       n.dataset.companyText=text;let size=data.writing==='elegant'?13:14;setSize(size);
       while((n.scrollHeight>n.parentElement.clientHeight-20||n.scrollWidth>n.parentElement.clientWidth+1)&&size>4){size=Math.max(4,size-.25);setSize(size);}
-      probe.remove();if(n.scrollHeight>n.parentElement.clientHeight-16||n.scrollWidth>n.parentElement.clientWidth+1)fits=false;
+      if(n.scrollHeight>n.parentElement.clientHeight-16||n.scrollWidth>n.parentElement.clientWidth+1)fits=false;
     }return fits;
   }
   function syncButtons(){const disabled=busy||!names().length||!!issue;for(const id of ['designPrint','designDownload'])el(id).disabled=disabled;if(data.active)for(const id of ['printTop','downloadTop'])el(id).disabled=disabled;}

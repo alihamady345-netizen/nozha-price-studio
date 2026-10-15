@@ -21,3 +21,7 @@ The shared products table has no product-count ceiling. The browser reads only 3
 ## Desktop app
 
 PriceDesk Studio can be installed as a standalone desktop web app in supported browsers. The header's Install app button opens the native prompt when available, with browser-menu guidance otherwise. The manifest uses stable app identity `/` and 192/512 PNG icons. The shared library requires an internet connection. The service worker caches only an offline notice; it never caches product API responses or app HTML and never queues price writes. No automatic page reload interrupts an active print job.
+
+## Startup performance
+
+PDF, camera scanning, ZIP and spreadsheet compatibility libraries load only when used. This reduces initial uncompressed script bytes from 2,402,739 to about 295,000 (88% less initial JavaScript, not a measured 88% latency improvement). Shared prices remain network-only and are rechecked before a product is added. The offers library refreshes only when its workspace is active; server date and expiry checks still run before printing. Run `npm run test:assets` to check loader deduplication and retry behavior.

@@ -9,6 +9,7 @@
   "scripts": {
     "check": "node --check api/bridge.js",
     "test:catalog": "node tests/catalog-capacity.test.mjs",
-    "test:pwa": "node tests/pwa.test.mjs"
+    "test:pwa": "node tests/pwa.test.mjs",
+    "test:assets": "node tests/asset-loader.test.mjs"
   }
 }

@@ -63,9 +63,10 @@
     stopMedia();const token=generation;opening=true;
     cameraMessage(tr('يجري فتح الكاميرا…'));$('cameraChoice').hidden=true;
     if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){opening=false;cameraMessage(tr('افتح الرابط في متصفح يدعم الكاميرا مثل Chrome أو Safari. يمكنك استخدام قارئ الكمبيوتر أو إدخال الرقم يدويًا.'),true);return;}
-    if(!window.ZXingBrowser?.BrowserMultiFormatReader){opening=false;cameraMessage(tr('تعذر تحميل قارئ الباركود. أعد تحميل الصفحة ثم جرّب مرة أخرى.'),true);return;}
     let acquired;
     try{
+      await window.StudioAssets.load('camera');
+      if(token!==generation||!dialog.open)return;
       acquired=await navigator.mediaDevices.getUserMedia({audio:false,video:deviceId?{deviceId:{exact:deviceId}}:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}});
       if(token!==generation||!dialog.open){acquired.getTracks().forEach(track=>track.stop());return;}
       stream=acquired;

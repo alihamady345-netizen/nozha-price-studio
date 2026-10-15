@@ -1,1 +1,13 @@
-{"name":"nozha-price-studio","version":"1.0.0","private":true,"type":"module","engines":{"node":"24.x"},"scripts":{"check":"node --check api/bridge.js"}}
+{
+  "name": "nozha-price-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "check": "node --check api/bridge.js",
+    "test:catalog": "node tests/catalog-capacity.test.mjs"
+  }
+}

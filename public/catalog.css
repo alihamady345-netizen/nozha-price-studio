@@ -14,3 +14,7 @@
 .library-price{display:block;margin-bottom:4px}
 .library-price b{display:inline-block;font-family:Arial,sans-serif;font-size:16px;color:#173c2a}
 @media print{.save-destination{display:none!important}}
+
+/* Large shared libraries keep only one result page in the browser. */
+.catalog-jump{display:flex;align-items:center;gap:8px;margin:0;flex-wrap:wrap}.catalog-jump[hidden]{display:none}.catalog-jump label{font-size:12px;margin:0;white-space:nowrap}.catalog-jump input{width:76px;min-height:36px;padding:5px 8px;direction:ltr;text-align:center}.catalog-jump .secondary{min-height:36px;padding:5px 12px}.catalog-footer{flex-wrap:wrap}
+@media(max-width:560px){.catalog-jump{width:100%}.catalog-jump input{flex:1;max-width:100px}.catalog-status{font-size:13px}}

@@ -1,6 +1,8 @@
 'use strict';
 (() => {
  const catalog={items:[],total:0,page:0,pageSize:30,loading:false,error:'',notice:'',query:'',currentMatch:null};
+ const countText=n=>new Intl.NumberFormat(state.language==='en'?'en-US':'ar-SA').format(n);
+ const jump=document.createElement('form');jump.id='catalogJump';jump.className='catalog-jump';jump.innerHTML='<label for="catalogJumpPage" id="catalogJumpLabel">انتقال إلى صفحة</label><input id="catalogJumpPage" type="number" min="1" step="1" inputmode="numeric" value="1" required><button type="submit" class="secondary" id="catalogJumpGo">انتقال</button>';$('catalogPage').closest('.catalog-pages').after(jump);
  let controller,queryTimer,barcodeTimer,barcodeController,bulkSaving=false;
  const messages={unavailable:'تعذر الاتصال بمكتبة الأصناف. بياناتك باقية؛ أعد المحاولة.',conflict:'تم تعديل الصنف من جهاز آخر. حمّل أحدث بياناته قبل حفظ تعديلك.',duplicate:'هذا الباركود محفوظ لصنف موجود. حمّل بياناته لتعديله دون إنشاء نسخة مكررة.',invalid_product:'راجع اسم الصنف والوحدة قبل الحفظ.',invalid_price:'أدخل سعرًا صحيحًا؛ مثال: 12.95. يُسمح بمنزلتين عشريتين.',invalid_barcode:'راجع رقم الباركود ونوعه قبل الحفظ.',not_found:'لم يعد الصنف متاحًا. حدّث المكتبة.',access_denied:'تعذر السماح بالحفظ. افتح الموقع مباشرة وأعد المحاولة.'};
  const intoCard=p=>({...p,copies:1,catalogId:p.id,catalogVersion:p.version,catalogPrice:p.price});
@@ -21,9 +23,10 @@
  }
  function draw(){
   $('catalogResults').innerHTML=catalog.items.map(p=>`<article class="catalog-result"><div class="catalog-product"><h3>${escapeHtml(productName(p))}</h3><p>${escapeHtml(productText(p,'unit')||p.unit||p.unitEn||'')} <b dir="ltr">${escapeHtml(p.barcode)}</b></p><small>${tr('آخر تعديل:')} ${escapeHtml(dateText(p.updatedAt))}</small></div><div class="catalog-price" dir="ltr">${riyalMarkup()}${escapeHtml(p.price)}</div><div class="catalog-actions"><button type="button" class="catalog-use" data-use-product="${escapeHtml(p.id)}">${tr('إضافة للطباعة')}</button><button type="button" class="secondary" data-edit-product="${escapeHtml(p.id)}">${tr('تعديل بيانات المكتبة')}</button></div></article>`).join('');
-  $('catalogStatus').textContent=catalog.loading?tr('يجري تحميل الأصناف…'):catalog.error||catalog.notice||(!catalog.total?(catalog.query?tr('لا توجد نتائج. جرّب جزءًا من الاسم أو الباركود.'):tr('المكتبة فارغة. احفظ أول صنف من بيانات البطاقة ليصبح متاحًا للجميع.')):state.language==='en'?`${catalog.total} matching products`:`${displayDigits(catalog.total)} صنف`);
+  $('catalogStatus').textContent=catalog.loading?tr('يجري تحميل الأصناف…'):catalog.error||catalog.notice||(!catalog.total?(catalog.query?tr('لا توجد نتائج. جرّب جزءًا من الاسم أو الباركود.'):tr('المكتبة فارغة. احفظ أول صنف من بيانات البطاقة ليصبح متاحًا للجميع.')):state.language==='en'?`${countText(catalog.total)} products · showing ${countText(catalog.page*catalog.pageSize+1)}–${countText(Math.min(catalog.total,(catalog.page+1)*catalog.pageSize))}`:`${countText(catalog.total)} صنف · عرض ${countText(catalog.page*catalog.pageSize+1)}–${countText(Math.min(catalog.total,(catalog.page+1)*catalog.pageSize))}`);
   const pages=Math.max(1,Math.ceil(catalog.total/catalog.pageSize));
   $('catalogPage').textContent=state.language==='en'?`${catalog.page+1} / ${pages}`:`${displayDigits(catalog.page+1)} / ${displayDigits(pages)}`;
+  jump.hidden=pages<=1;$('catalogJumpPage').max=String(pages);$('catalogJumpPage').value=String(catalog.page+1);$('catalogJumpPage').disabled=catalog.loading;$('catalogJumpGo').disabled=catalog.loading;$('catalogJumpLabel').textContent=state.language==='en'?'Go to page':'انتقال إلى صفحة';$('catalogJumpGo').textContent=state.language==='en'?'Go':'انتقال';
   $('catalogPrev').disabled=catalog.loading||catalog.page===0;
   $('catalogNext').disabled=catalog.loading||(catalog.page+1)*catalog.pageSize>=catalog.total;
   $('refreshCatalog').disabled=catalog.loading;
@@ -36,6 +39,7 @@
   try{
    const data=await request('/api/products?q='+encodeURIComponent(catalog.query)+'&page='+catalog.page,{signal:active.signal});
    if(active!==controller)return;catalog.items=data.products;catalog.total=data.total;catalog.pageSize=data.pageSize;
+   const lastPage=Math.max(0,Math.ceil(catalog.total/catalog.pageSize)-1);if(catalog.page>lastPage){catalog.page=lastPage;return load();}
   }catch(error){if(error.name==='AbortError')return;if(active===controller){catalog.items=[];catalog.error=error.message;}}
   finally{if(active===controller){catalog.loading=false;draw();}}
  }
@@ -95,6 +99,7 @@
  $('catalogSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(queryTimer);catalog.query=$('catalogSearch').value.trim();catalog.notice='';catalog.page=0;load();}});
  $('clearCatalogSearch').addEventListener('click',()=>{clearTimeout(queryTimer);$('catalogSearch').value='';catalog.query='';catalog.notice='';catalog.page=0;load();$('catalogSearch').focus();});
  $('refreshCatalog').addEventListener('click',()=>{clearTimeout(queryTimer);catalog.query=$('catalogSearch').value.trim();catalog.notice='';catalog.page=0;load();});
+ jump.addEventListener('submit',e=>{e.preventDefault();if(catalog.loading)return;const pages=Math.max(1,Math.ceil(catalog.total/catalog.pageSize)),page=Number(latinDigits($('catalogJumpPage').value));if(!Number.isInteger(page)||page<1||page>pages){$('catalogJumpPage').reportValidity();return;}catalog.page=page-1;load();});
  $('catalogPrev').addEventListener('click',()=>{catalog.page=Math.max(0,catalog.page-1);load();});
  $('catalogNext').addEventListener('click',()=>{catalog.page++;load();});
  $('catalogResults').addEventListener('click',async e=>{

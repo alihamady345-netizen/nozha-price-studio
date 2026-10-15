@@ -17,3 +17,7 @@ Browser-local unsaved drafts belong to the old domain and are not transferred au
 ## Regular-price library capacity
 
 The shared products table has no product-count ceiling. The browser reads only 30 matches at a time and can jump directly to any result page. `npm run test:catalog` exercises the actual catalog API against an isolated SQLite database with 30,000 products, including the final page, Arabic search, indexed barcode lookup, a 30,001st save, duplicate handling and version-conflict checks. This is a local scale and correctness check; it does not measure hosted quotas, network latency or production concurrency. No test products are inserted into the shared library.
+
+## Desktop app
+
+PriceDesk Studio can be installed as a standalone desktop web app in supported browsers. The header's Install app button opens the native prompt when available, with browser-menu guidance otherwise. The manifest uses stable app identity `/` and 192/512 PNG icons. The shared library requires an internet connection. The service worker caches only an offline notice; it never caches product API responses or app HTML and never queues price writes. No automatic page reload interrupts an active print job.

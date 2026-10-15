@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>استوديو بطاقات الأسعار | نزهة وكرز</title>
+  <title>PriceDesk Studio | نزهة وكرز</title>
   <meta name="description" content="قالب موحد لبطاقات أسعار نزهة وكرز. اختر الورق والتقسيم، أدخل الأصناف ثم اطبع بالمقاس الفعلي.">
   <meta name="theme-color" content="#142821">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/pricedesk-192.png">
+  <link rel="stylesheet" href="/install.css?v=20261015">
+  <script defer src="/install.js?v=20261015"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23142821'/%3E%3Crect x='7' y='6' width='18' height='21' rx='2' fill='white'/%3E%3Cpath d='M10 11h12M10 15h5M10 21h12' stroke='%23b99546' stroke-width='2'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="studio-v2.css">
@@ -35,10 +39,10 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="identity"><span class="app-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h3M9 16h6"/></svg></span><div><h1>بطاقات أسعار الفروع</h1><p>أسواق نزهة وكرز</p></div></div>
+    <div class="identity"><span class="app-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h3M9 16h6"/></svg></span><div><span class="product-app-name" translate="no" dir="ltr">PriceDesk Studio</span><h1>بطاقات أسعار الفروع</h1><p>أسواق نزهة وكرز</p></div></div>
     <div class="language-switch" role="group" aria-label="لغة الواجهة والبطاقات"><button type="button" data-language="ar" lang="ar" dir="rtl" aria-pressed="true">العربية</button><button type="button" data-language="en" lang="en" dir="ltr" aria-pressed="false">English</button></div>
     <div class="header-brands" aria-label="نزهة وكرز"><span class="brand-art nozha-art"><img src="assets/nozha.jpg" alt="نزهة"></span><span class="brand-art karaz-art"><img src="assets/karaz.jpg" alt="كرز"></span></div>
-    <div class="output-actions"><button type="button" class="download-button" id="downloadTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M8 13h8M8 17h5"/></svg>تنزيل PDF</button><button type="button" class="print-button" id="printTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V8h16v9h-3M7 14h10v7H7zM17 11h.01"/></svg>طباعة الآن</button></div>
+    <div class="output-actions"><button type="button" class="install-button" id="installApp">تثبيت التطبيق</button><button type="button" class="download-button" id="downloadTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v5h5M8 13h8M8 17h5"/></svg>تنزيل PDF</button><button type="button" class="print-button" id="printTop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V8h16v9h-3M7 14h10v7H7zM17 11h.01"/></svg>طباعة الآن</button></div>
   </header>
   <main class="workspace">
     <aside class="controls">
@@ -121,6 +125,11 @@
     <div class="scanner-video-wrap"><video id="scannerVideo" autoplay muted playsinline></video><div class="scan-guide" aria-hidden="true"></div></div>
     <p id="cameraStatus" class="camera-status" role="status" aria-live="polite">يجري فتح الكاميرا…</p>
     <div class="camera-controls"><label id="cameraChoice" hidden>الكاميرا<select id="cameraSelect"></select></label><button type="button" id="retryScanner" class="secondary" hidden>إعادة المحاولة</button><button type="button" id="cancelScanner" class="secondary">إلغاء</button></div>
+  </dialog>
+  <dialog id="installDialog" class="install-dialog" aria-labelledby="installTitle">
+    <div class="install-dialog-head"><img src="/assets/pricedesk-192.png" alt="" width="56" height="56"><div><h2 id="installTitle" translate="no" dir="ltr">PriceDesk Studio</h2><p id="installIntro"></p></div><button type="button" id="closeInstall" aria-label="إغلاق">×</button></div>
+    <p id="installInstructions"></p><p class="install-note" id="installNetwork"></p>
+    <button type="button" class="primary" id="confirmInstall" hidden>تثبيت الآن</button>
   </dialog>
 </body>
 </html>

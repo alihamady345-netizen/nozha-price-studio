@@ -1,0 +1,12 @@
+.product-app-name{display:block;font:700 12px/1.4 Arial,sans-serif;color:#d6ba76;letter-spacing:.05em;margin-bottom:3px}
+.install-button{border:1px solid #8b9d90;border-radius:9px;background:transparent;color:inherit;padding:10px 15px;white-space:nowrap;font-weight:700;font-size:13px}
+.install-button:hover{background:#ffffff15}
+.install-dialog{width:min(520px,calc(100% - 32px));padding:26px;border:1px solid #d5ddd8;border-radius:16px;color:#142821;font:inherit;box-shadow:0 20px 80px #10201840}
+.install-dialog::backdrop{background:#10201899}
+.install-dialog-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.install-dialog-head>div{flex:1}.install-dialog-head h2{font-family:Arial,sans-serif;text-align:start}
+.install-dialog-head img{border-radius:12px}.install-dialog-head p{font-size:13px;color:#65756b;margin-top:5px}
+.install-dialog-head button{align-self:flex-start;background:#eef2ee;color:#142821;width:32px;height:32px;border-radius:8px;font-size:22px}
+.install-note{margin:16px 0 20px;color:#65756b;font-size:13px}
+@media(max-width:760px){.app-header{flex-wrap:wrap}.install-button{font-size:12px;padding:9px 10px}}
+@media print{#installApp,#installDialog{display:none!important}}

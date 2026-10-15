@@ -147,7 +147,7 @@ function translateInterface(){
     if(binding.element?.isConnected)binding.element.setAttribute(binding.attribute,value);
   }
   const english=state.language==='en';document.documentElement.lang=state.language;document.documentElement.dir=english?'ltr':'rtl';
-  document.title=tr('استوديو بطاقات الأسعار | نزهة وكرز');
+  document.title='PriceDesk Studio | '+(state.language==='en'?'Nozha & Karaz':'نزهة وكرز');
   document.querySelector('meta[name="description"]').content=tr('قالب موحد لبطاقات أسعار نزهة وكرز. اختر الورق والتقسيم، أدخل الأصناف ثم اطبع بالمقاس الفعلي.');
   for(const id of ['productName','productUnit'])document.getElementById(id).dir=english?'ltr':'rtl';
   for(const id of ['productNameOther','productUnitOther'])document.getElementById(id).dir=english?'rtl':'ltr';

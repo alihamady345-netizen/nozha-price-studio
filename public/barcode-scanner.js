@@ -34,7 +34,7 @@
   function acceptBarcode(text,format='AUTO'){
     const barcode=latinDigits(text).trim();
     if(!barcode||barcode.length>40||!/^[\x20-\x7E]+$/.test(barcode))throw new Error(tr('تعذر استخدام هذا الباركود. أدخل الرقم يدويًا.'));
-    const resolved=format==='AUTO'?(/^\d{13}$/.test(barcode)?'EAN13':/^\d{12}$/.test(barcode)?'UPC':/^\d{8}$/.test(barcode)?'EAN8':'CODE128'):format;
+    const resolved=resolveBarcodeFormat(barcode,format);
     barcodeData(barcode,resolved);
     $('productBarcode').value=barcode;$('barcodeType').value=resolved;
     $('productBarcode').dispatchEvent(new Event('input',{bubbles:true}));

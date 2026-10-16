@@ -110,6 +110,17 @@ function barcodeData(barcode,format){
   return output.encodings.map(e=>e.data).join('');
 }
 
+function resolveBarcodeFormat(barcode,format='AUTO'){
+  const candidate=format==='AUTO'?(/^\d{13}$/.test(barcode)?'EAN13':/^\d{12}$/.test(barcode)?'UPC':/^\d{8}$/.test(barcode)?'EAN8':'CODE128'):format;
+  // Preserve the supplied number even when a retail format cannot encode it.
+  // The same fallback applies to manually selected formats and scanned codes.
+  if(candidate!=='CODE128'){
+    if(typeof JsBarcode!=='function')throw new Error(tr('تعذر تحميل مولد الباركود. أعد تحميل الصفحة.'));
+    try{barcodeData(barcode,candidate);return candidate;}catch{return 'CODE128';}
+  }
+  return candidate;
+}
+
 function validateProduct(raw){
   const name=String(raw.name??'').trim(),unit=String(raw.unit??'').trim(),nameEn=String(raw.nameEn??'').trim(),unitEn=String(raw.unitEn??'').trim();
   if(!name&&!nameEn)throw new Error(tr('أدخل اسم الصنف.'));
@@ -122,7 +133,7 @@ function validateProduct(raw){
   if(!barcode||barcode.length>40||!/^[\x20-\x7E]+$/.test(barcode))throw new Error(tr('أدخل باركودًا صحيحًا بالأرقام أو الأحرف الإنجليزية، بحد أقصى ٤٠ حرفًا.'));
   let format=raw.format??'AUTO';
   if(!['AUTO','EAN13','EAN8','UPC','CODE128'].includes(format))throw new Error(tr('نوع الباركود غير مدعوم.'));
-  if(format==='AUTO')format=/^\d{13}$/.test(barcode)?'EAN13':/^\d{12}$/.test(barcode)?'UPC':/^\d{8}$/.test(barcode)?'EAN8':'CODE128';
+  format=resolveBarcodeFormat(barcode,format);
   barcodeData(barcode,format);
   return {name,nameEn,unit,unitEn,price:Number(priceText).toFixed(2),copies,barcode,format};
 }
@@ -149,8 +160,7 @@ function emptySlotMarkup(index,preview){
 function draftProduct(raw){
   const price=latinDigits(raw.price||'').trim().replace(/[٫,]/g,'.');
   let barcode=latinDigits(raw.barcode||'').trim(),format=raw.format||'AUTO';
-  if(format==='AUTO')format=/^\d{13}$/.test(barcode)?'EAN13':/^\d{12}$/.test(barcode)?'UPC':/^\d{8}$/.test(barcode)?'EAN8':'CODE128';
-  try{if(barcode)barcodeData(barcode,format);}catch{barcode='';}
+  try{format=resolveBarcodeFormat(barcode,format);if(barcode)barcodeData(barcode,format);}catch{barcode='';}
   return {name:raw.name||'',nameEn:raw.nameEn||'',unit:raw.unit||'',unitEn:raw.unitEn||'',price:/^\d{1,7}(?:\.\d{1,2})?$/.test(price)?Number(price).toFixed(2):'',barcode,format};
 }
 

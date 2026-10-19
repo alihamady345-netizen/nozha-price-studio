@@ -12,3 +12,10 @@ html[lang] .price-tag.tiny-label .tag-price{width:calc(100% - 6mm);margin-right:
 html[lang] .price-tag.tiny-label .tag-header{bottom:calc(var(--tag-pad) + var(--tag-footer-h) + 1.5mm)}
 html[lang] .price-tag.tiny-label .tag-price-inner{padding:.1em .2mm}
 html[lang] .price-tag.tiny-label .tag-price .riyal-symbol{margin:0 .16em}
+
+html[lang] .price-tag.mini-label .tag-header,html[lang] .price-tag.mini-label .tag-footer,html[lang] .price-tag.mini-label .tag-unit{display:none}
+html[lang] .price-tag.mini-label .tag-price{width:100%;margin:.1mm 0 0}
+html[lang] .price-tag.mini-label .tag-price-inner{padding:.1em 0;left:0}
+html[lang] .price-tag.mini-label .tag-price::before{border-top:0;border-bottom:.15mm solid var(--tag-brand)}
+html[lang] .price-tag.mini-label .tag-price::after{display:none}
+html[lang] .price-tag.mini-label .tag-price .riyal-symbol{margin:0 .12em}

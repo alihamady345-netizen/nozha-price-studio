@@ -71,9 +71,9 @@ function getLayout(settings=state){
   if(settings.count===64)Object.assign(layout,{tiny:true,pad:.7,bw:cw-1.8,logoH:3,logoW:settings.brand==='karaz'?5.28:3.48,
     nameSize:2,unitSize:1.5,priceSize:5,barcodeH:4,barcodeText:1.5,footerH:6.7,contentW:cw-1.8,contentH:ch-8.5,
     priceMargin:.1,priceShift:0});
-  if(settings.count>=128)Object.assign(layout,{mini:true,compact:true,pad:.6,bw:0,headerH:0,footerH:0,
+  if(settings.count>=128)Object.assign(layout,{mini:true,compact:true,pad:.6,bw:cw-1.6,headerH:0,footerH:3.5,barcodeH:1.8,barcodeText:1,footerPad:.1,
     nameSize:settings.count===128?1.9:1.45,priceSize:settings.count===128?4.3:3,
-    contentH:ch-1.6,contentW:cw-1.6,nameSecondaryRatio:1,priceMargin:.1,priceShift:0});
+    contentH:ch-5.1,contentW:cw-1.6,nameSecondaryRatio:1,priceMargin:.1,priceShift:0});
   return layout;
 }
 
@@ -193,13 +193,13 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
   }).join('');
   paper.querySelectorAll('.price-tag[data-barcode]').forEach(tag=>{
     if(tag.dataset.missingName==='true')addIssue(tr('أكمل تعريف الصنف بالعربية في جميع البطاقات قبل الطباعة.'));
-    if(!tag.dataset.barcode||l.mini)return;
+    if(!tag.dataset.barcode)return;
     const data=barcodeData(tag.dataset.barcode,tag.dataset.format),svg=tag.querySelector('.tag-barcode');
     const quiet=10,height=50;
     svg.setAttribute('viewBox',`0 0 ${data.length+2*quiet} ${height}`);svg.setAttribute('preserveAspectRatio','none');
     let bars='';for(let i=0;i<data.length;i++)if(data[i]==='1')bars+=`<rect x="${i+quiet}" y="0" width="1" height="${height}"/>`;
     svg.innerHTML=bars;
-    if(l.bw/(data.length+2*quiet)<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
+    if(!l.mini&&l.bw/(data.length+2*quiet)<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
   return paper;
 }

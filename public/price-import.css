@@ -13,9 +13,12 @@ html[lang] .price-tag.tiny-label .tag-header{bottom:calc(var(--tag-pad) + var(--
 html[lang] .price-tag.tiny-label .tag-price-inner{padding:.1em .2mm}
 html[lang] .price-tag.tiny-label .tag-price .riyal-symbol{margin:0 .16em}
 
-html[lang] .price-tag.mini-label .tag-header,html[lang] .price-tag.mini-label .tag-footer,html[lang] .price-tag.mini-label .tag-unit{display:none}
+html[lang] .price-tag.mini-label .tag-header,html[lang] .price-tag.mini-label .tag-unit{display:none}
 html[lang] .price-tag.mini-label .tag-price{width:100%;margin:.1mm 0 0}
 html[lang] .price-tag.mini-label .tag-price-inner{padding:.1em 0;left:0}
 html[lang] .price-tag.mini-label .tag-price::before{border-top:0;border-bottom:.15mm solid var(--tag-brand)}
 html[lang] .price-tag.mini-label .tag-price::after{display:none}
 html[lang] .price-tag.mini-label .tag-price .riyal-symbol{margin:0 .12em}
+
+.price-import-bottom{display:block}.price-import-sizes{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));margin-top:14px}.price-import-sizes button{min-width:0;padding:9px 5px}
+@media(max-width:700px){.price-import-sizes{grid-template-columns:repeat(3,minmax(0,1fr))}}

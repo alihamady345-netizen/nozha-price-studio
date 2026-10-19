@@ -120,10 +120,13 @@ function signatureMarkup(){
 
 function barcodeData(barcode,format){
   if(typeof JsBarcode!=='function')throw new Error(tr('تعذر تحميل مولد الباركود. أعد تحميل الصفحة.'));
+  const cache=barcodeData.cache??=new Map(),key=format+'\n'+barcode;
+  if(cache.has(key))return cache.get(key);
   const output={};
   try { JsBarcode(output,barcode,{format,displayValue:false}); }
   catch {throw new Error(state.language==='en'?`Invalid ${format} barcode. Check its number and check digit, or choose CODE128 for an internal code.`:`الباركود غير صحيح لنوع ${format}. راجع الرقم وخانة التحقق، أو اختر CODE128 إذا كان رقمًا داخليًا.`);}
-  return output.encodings.map(e=>e.data).join('');
+  const encoded=output.encodings.map(e=>e.data).join('');
+  if(cache.size>=2000)cache.clear();cache.set(key,encoded);return encoded;
 }
 
 function resolveBarcodeFormat(barcode,format='AUTO'){
@@ -380,11 +383,7 @@ function alignSheetPrices(){
 function showLayoutIssues(){
   if(window.bundleStudio?.active){window.bundleStudio.syncButtons();return;}
   if(window.designStudio?.active){window.designStudio.syncButtons();return;}
-  if(!window.offerStudio?.active&&window.priceImport?.blocksPrint){
-    $('layoutWarning').hidden=false;$('layoutWarning').textContent=window.priceImport.message;
-    for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=true;
-    return;
-  }
+  if(window.priceImport?.active){window.priceImport.syncButtons();return;}
   $('layoutWarning').hidden=!lastIssues.length;$('layoutWarning').textContent=lastIssues.join(' ');
   const disabled=!filledCount()||!!lastIssues.length||pendingDraftIndexes().length>0||state.sample||formSaving||document.body.classList.contains('exporting');
   for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=disabled;
@@ -529,7 +528,7 @@ function preparePrint(){
   if(window.bundleStudio?.active)return window.bundleStudio.preparePrint();
   if(window.designStudio?.active)return window.designStudio.preparePrint();
   if(window.offerStudio?.active)return window.offerStudio.preparePrint();
-  if(window.priceImport?.blocksPrint){showLayoutIssues();return false;}
+  if(window.priceImport?.active)return window.priceImport.preparePrint();
   const root=$('printRoot');
   if(!filledCount()||pendingDraftIndexes().length||formSaving){root.replaceChildren();return false;}
   updateLayout();

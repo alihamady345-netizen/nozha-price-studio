@@ -54,60 +54,92 @@ window.PriceImportData=(()=>{
 
 // IMPORT_UI
 (()=>{
+  const sizes={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
+  const L=(ar,en)=>state.language==='en'?en:ar;
   const root=document.createElement('section');root.className='price-import';root.setAttribute('aria-labelledby','priceImportHeading');
-  root.innerHTML=`<div class="price-import-heading"><div><span class="price-import-eyebrow">EXCEL → PRINT</span><h2 id="priceImportHeading">من الإكسيل إلى بطاقات الأسعار</h2><p id="priceImportIntro">ارفع الملف، اختر مقاس البطاقة، ثم اطبع جميع الأصناف.</p></div><label class="price-import-upload"><span id="priceImportUploadLabel">رفع إكسيل الأسعار</span><input id="priceImportFile" type="file" accept=".xlsx,.xls,.csv,.tsv"></label></div><div class="price-import-sheet" hidden><label for="priceImportSheet">ورقة العمل</label><select id="priceImportSheet"></select></div><p id="priceImportStatus" role="status" aria-live="polite">يدعم اسم الصنف، الوحدة، سعر التجزئة، والباركود أو رقم الصنف.</p><div class="price-import-bottom"><div><strong id="priceImportSizeLabel">مقاس البطاقة</strong><span id="priceImportSizeHint">توزيع على ورق A4 بهوامش طباعة؛ A11 وA12 بباركود مصغّر يحتاج اختبار القراءة بعد الطباعة.</span></div><div class="price-import-sizes" role="group" aria-labelledby="priceImportSizeLabel">${['A4','A5','A6','A7','A8','A9','A10','A11','A12'].map((s,i)=>`<button type="button" data-price-size="${s}" aria-pressed="false"><b>${s}</b><small>${[1,2,4,8,16,32,64,128,256][i]} / A4</small></button>`).join('')}</div></div><p id="priceImportSummary" class="price-import-summary" role="status"></p>`;
+  root.innerHTML=`<div class="price-import-heading"><div><span class="price-import-eyebrow">EXCEL → PRINT</span><h2 id="priceImportHeading">من الإكسيل إلى بطاقات الأسعار</h2><p id="priceImportIntro">ارفع الإكسيل، حدد مقاس كل صنف، ثم اطبع الكل.</p></div><label class="price-import-upload"><span id="priceImportUploadLabel">رفع إكسيل الأسعار</span><input id="priceImportFile" type="file" accept=".xlsx,.xls,.csv,.tsv"></label></div><div class="price-import-sheet" hidden><label for="priceImportSheet">ورقة العمل</label><select id="priceImportSheet"></select></div><p id="priceImportStatus" role="status" aria-live="polite">يتعرف على اسم الصنف والوحدة وسعر التجزئة والباركود أو رقم الصنف.</p><div id="priceImportJob" hidden><div class="price-import-bottom"><div><strong id="priceImportSizeLabel">تطبيق مقاس على الأصناف المحددة</strong><span id="priceImportSizeHint">يمكنك اختيار مقاس مختلف أمام كل صنف. المقاسات موزعة على ورق A4 بهوامش طباعة.</span></div><div class="price-import-sizes" role="group" aria-labelledby="priceImportSizeLabel">${Object.entries(sizes).map(([s,[n]])=>`<button type="button" data-price-size="${s}"><b>${s}</b><small>${n} / A4</small></button>`).join('')}</div></div><div class="price-import-table-wrap"><table class="price-import-table"><thead><tr><th><input id="priceImportSelectAll" type="checkbox" aria-label="تحديد جميع الأصناف" checked></th><th>#</th><th>الصنف / الباركود</th><th>السعر</th><th>مقاس البطاقة</th></tr></thead><tbody id="priceImportRows"></tbody></table></div><div id="priceImportGroups" class="price-import-groups"></div><p id="priceImportMiniNote" hidden>A11 وA12: الباركود ورقمه موجودان بحجم مصغّر جدًا؛ قراءة القارئ غير مضمونة. جرّب ورقة أولًا.</p><div class="price-import-actions"><div><strong id="priceImportSummary" role="status"></strong><p id="priceImportReady" role="status"></p></div><div><button type="button" id="priceImportPdf" class="download-button">تنزيل الكل PDF</button><button type="button" id="priceImportPrint" class="print-button">طباعة الكل</button></div></div></div>`;
   document.querySelector('.workspace .main-surface').prepend(root);
   const status=$('priceImportStatus'),input=$('priceImportFile'),sheetSelect=$('priceImportSheet');
-  let workbook=null,filename='',busy=false,needsSize=false,imported=false,summary='';
-  const L=(ar,en)=>state.language==='en'?en:ar;
-  const sizes={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
-  function update(){
-    input.disabled=busy;sheetSelect.disabled=busy;
-    root.querySelectorAll('[data-price-size]').forEach(b=>{const [count,orientation]=sizes[b.dataset.priceSize],active=!needsSize&&state.paper==='A4'&&state.count===count&&state.orientation===orientation;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));b.disabled=busy;});
-    $('priceImportSummary').textContent=imported?needsSize?L('تم إدخال الأصناف. اختر مقاس البطاقة لتجهيز الطباعة.','Products imported. Choose a label size to prepare printing.'):L(`${filledCount()} بطاقة · ${pageCount()} ورقة للطباعة${state.count>=128?' · باركود مصغّر جدًا: قراءة القارئ غير مضمونة، جرّب ورقة أولًا':''}`,`${filledCount()} labels · ${pageCount()} sheets to print${state.count>=128?' · Mini barcode: scanning is not guaranteed; test one sheet first':''}`):'';
-    showLayoutIssues();
+  let workbook=null,filename='',busy=false,imported=false,rows=[],jobIssues=[];
+  const active=()=>(imported||busy)&&!window.offerStudio?.active&&!window.designStudio?.active&&!window.bundleStudio?.active;
+  const selected=()=>rows.filter(r=>r.selected&&state.cards[r.position]);
+  const groups=()=>Object.keys(sizes).map(size=>({size,rows:selected().filter(r=>r.size===size)})).filter(g=>g.rows.length);
+  function message(){if(busy)return L('جارٍ التحقق من الإكسيل…','Validating workbook…');if(!selected().length)return L('حدد صنفًا واحدًا على الأقل.','Select at least one product.');const missing=selected().filter(r=>!r.size).length;return missing?L(`اختر مقاس ${missing} صنف قبل الطباعة.`,`Choose a size for ${missing} product(s) before printing.`):jobIssues.join(' ');}
+  function syncButtons(){
+    const issue=message(),disabled=!!issue||formSaving||pendingDraftIndexes().length>0||state.sample||document.body.classList.contains('exporting');
+    for(const id of ['priceImportPrint','priceImportPdf'])$(id).disabled=disabled;
+    if(active()){
+      for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=disabled;
+      $('layoutWarning').hidden=!issue;$('layoutWarning').textContent=issue;
+    }
+    $('priceImportReady').textContent=issue||L('جاهز: تُجمع الأصناف في صفحات حسب مقاس كل صنف.','Ready: products are grouped into sheets by their selected sizes.');
   }
-  function applySize(size){
+  function renderRows(){
+    $('priceImportRows').innerHTML=rows.filter(r=>state.cards[r.position]).map((r,i)=>{const p=state.cards[r.position];return `<tr><td><input type="checkbox" data-price-select="${r.position}" aria-label="تحديد ${escapeHtml(p.name||p.nameEn)}" ${r.selected?'checked':''}></td><td>${i+1}</td><td><strong>${escapeHtml(productText(p))}</strong><small>${escapeHtml(productText(p,'unit'))}</small><b dir="ltr">${escapeHtml(p.barcode)}</b></td><td dir="ltr">${escapeHtml(p.price)}</td><td><select data-price-row-size="${r.position}" aria-label="مقاس ${escapeHtml(p.name||p.nameEn)}"><option value="">${L('اختر المقاس','Choose size')}</option>${Object.keys(sizes).map(s=>`<option value="${s}" ${r.size===s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`;}).join('');
+  }
+  function update({table=false}={}){
+    if(imported){const known=new Set(rows.map(r=>r.position));state.cards.forEach((p,position)=>{if(p&&!known.has(position))rows.push({position,selected:true,size:''});});}
+    input.disabled=busy;sheetSelect.disabled=busy;$('priceImportJob').hidden=!imported;
+    root.querySelectorAll('[data-price-size]').forEach(b=>b.disabled=busy);
+    if(table)renderRows();
+    const plan=groups(),count=selected().length,sheets=plan.reduce((n,g)=>n+Math.ceil(g.rows.length/sizes[g.size][0]),0);
+    $('priceImportSummary').textContent=L(`${count} بطاقة محددة · ${sheets} ورقة طباعة`,`${count} selected labels · ${sheets} print sheets`);
+    $('priceImportGroups').innerHTML=plan.map(g=>`<span><b>${g.size}</b> · ${g.rows.length} ${L('صنف','products')} · ${Math.ceil(g.rows.length/sizes[g.size][0])} ${L('ورقة','sheets')}</span>`).join('');
+    $('priceImportMiniNote').hidden=!plan.some(g=>sizes[g.size][0]>=128);
+    const all=$('priceImportSelectAll'),populated=rows.filter(r=>state.cards[r.position]);all.checked=!!populated.length&&populated.every(r=>r.selected);all.indeterminate=count>0&&count<populated.length;
+    if(active())syncButtons();
+  }
+  function previewSize(size){
     [state.count,state.orientation]=sizes[size];state.paper='A4';state.page=0;state.selected=0;state.sample=false;
     $('paper').value=state.paper;$('orientation').value=state.orientation;
-    document.querySelectorAll('[data-count]').forEach(b=>{const active=Number(b.dataset.count)===state.count;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
-    needsSize=false;trimGrid();loadForm();render();update();
+    document.querySelectorAll('[data-count]').forEach(b=>{const on=Number(b.dataset.count)===state.count;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
+    trimGrid();loadForm();render();
+    $('previewSubtitle').textContent=L(`معاينة تقسيم ${size}؛ طباعة الكل تعتمد المقاس المحدد أمام كل صنف في جدول الإكسيل.`,`Preview of the ${size} layout; Print all uses each product’s size from the Excel table.`);
   }
   async function importSheet(index){
-    const sheet=await workbook.sheet(index),config=window.PriceImportData.detect(sheet);
-    const result=window.PriceImportData.extract(sheet,config,validateProduct);
-    needsSize=true;replaceProducts(result.products);imported=true;
-    summary=L(`تم إدخال ${result.products.length} صنفًا من «${filename}» · ${sheet.name} · العناوين في الصف ${config.header}.`,`Imported ${result.products.length} products from “${filename}” · ${sheet.name} · header row ${config.header}.`);
+    const sheet=await workbook.sheet(index),config=window.PriceImportData.detect(sheet),result=window.PriceImportData.extract(sheet,config,validateProduct);
+    // Validation completes before the existing job is replaced.
+    replaceProducts(result.products);rows=state.cards.flatMap((p,position)=>p?[{position,selected:true,size:''}]:[]);imported=true;jobIssues=[];
+    let summary=L(`تم إدخال ${result.products.length} صنفًا من «${filename}» · ${sheet.name} · العناوين في الصف ${config.header}.`,`Imported ${result.products.length} products from “${filename}” · ${sheet.name} · header row ${config.header}.`);
     if(result.roundedRows.length)summary+=L(` تم تقريب ${result.roundedRows.length} سعر إلى منزلتين عشريتين (الصفوف: ${result.roundedRows.join('، ')}).`,` ${result.roundedRows.length} price(s) rounded to two decimals (rows: ${result.roundedRows.join(', ')}).`);
     status.textContent=summary;status.classList.remove('is-error');
   }
-  async function run(action){
-    busy=true;status.textContent=L('جارٍ قراءة الإكسيل والتحقق من الأصناف…','Reading workbook and validating products…');update();
-    try{await action();}catch(error){status.textContent=error.message;status.classList.add('is-error');}
-    finally{busy=false;update();}
-  }
+  async function run(action){const started=performance.now();busy=true;status.textContent=L('جارٍ قراءة الإكسيل والتحقق من الأصناف…','Reading workbook and validating products…');update();try{await action();}catch(error){status.textContent=error.message;status.classList.add('is-error');}finally{busy=false;update({table:true});if(!status.classList.contains('is-error'))status.textContent+=L(` · تجهيز ${( (performance.now()-started)/1000).toFixed(1)} ثانية.`,` · Prepared in ${((performance.now()-started)/1000).toFixed(1)} s.`);}}
   input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;input.value='';run(async()=>{
     if(file.size>20*1024*1024)throw new Error('حجم الملف أكبر من ٢٠ ميجابايت. قسّم الملف.');
-    const next=await window.OfferWorkbook.read(await file.arrayBuffer(),file.name);
-    let best=-1,bestCount=-1;
-    for(let i=0;i<next.sheets.length;i++){if(next.sheets[i].hidden)continue;const config=window.PriceImportData.detect(await next.sheet(i));if(config&&config.count>bestCount){best=i;bestCount=config.count;}}
+    const next=await window.OfferWorkbook.read(await file.arrayBuffer(),file.name);let best=-1,bestCount=-1;
+    for(let i=0;i<next.sheets.length;i++){if(next.sheets[i].hidden)continue;const c=window.PriceImportData.detect(await next.sheet(i));if(c&&c.count>bestCount){best=i;bestCount=c.count;}}
     if(best<0)throw new Error('لم أجد ورقة بها اسم الصنف وسعر التجزئة. راجع عناوين الأعمدة.');
-    workbook=next;filename=file.name;sheetSelect.replaceChildren(...next.sheets.map((s,i)=>new Option(s.name,i)));sheetSelect.value=String(best);sheetSelect.parentElement.hidden=next.sheets.length<2;
-    await importSheet(best);
+    workbook=next;filename=file.name;sheetSelect.replaceChildren(...next.sheets.map((s,i)=>new Option(s.name,i)));sheetSelect.value=String(best);sheetSelect.parentElement.hidden=next.sheets.length<2;await importSheet(best);
   });});
   sheetSelect.addEventListener('change',()=>run(()=>importSheet(Number(sheetSelect.value))));
-  root.querySelectorAll('[data-price-size]').forEach(b=>b.addEventListener('click',()=>applySize(b.dataset.priceSize)));
-  for(const element of [$('paper'),$('orientation'),...document.querySelectorAll('[data-count]')])element.addEventListener(element.tagName==='BUTTON'?'click':'change',()=>{needsSize=false;update();});
+  root.querySelectorAll('[data-price-size]').forEach(b=>b.addEventListener('click',()=>{for(const r of selected())r.size=b.dataset.priceSize;jobIssues=[];previewSize(b.dataset.priceSize);update({table:true});}));
+  $('priceImportRows').addEventListener('change',event=>{const el=event.target,position=Number(el.dataset.priceRowSize??el.dataset.priceSelect),row=rows.find(r=>r.position===position);if(!row)return;jobIssues=[];if(el.matches('[data-price-row-size]')){row.size=el.value;if(row.size)previewSize(row.size);}else row.selected=el.checked;update();});
+  $('priceImportSelectAll').addEventListener('change',event=>{rows.forEach(r=>r.selected=event.target.checked);jobIssues=[];update({table:true});});
+  $('priceImportPrint').addEventListener('click',printNow);$('priceImportPdf').addEventListener('click',downloadPricePdf);
   document.addEventListener('pricing:mode',update);
-  document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('click',()=>{
-    $('priceImportHeading').textContent=L('من الإكسيل إلى بطاقات الأسعار','Excel to price labels');
-    $('priceImportIntro').textContent=L('ارفع الملف، اختر مقاس البطاقة، ثم اطبع جميع الأصناف.','Upload a workbook, choose a label size, then print all products.');
-    $('priceImportUploadLabel').textContent=L('رفع إكسيل الأسعار','Upload price workbook');
-    $('priceImportSizeLabel').textContent=L('مقاس البطاقة','Label size');
-    $('priceImportSizeHint').textContent=L('توزيع على ورق A4 بهوامش طباعة؛ A11 وA12 بباركود مصغّر يحتاج اختبار القراءة بعد الطباعة.','A4 sheets with print margins; A11/A12 use miniature barcodes that need a printed scan test.');update();
-  }));
-  window.priceImport={get blocksPrint(){return busy||needsSize;},get message(){return busy?L('جارٍ التحقق من ملف الإكسيل.','Validating workbook.'):L('اختر مقاس البطاقة بعد رفع الإكسيل.','Choose a label size after importing.');}};
-  // Keep the imported job summary accurate when cards are edited or removed.
-  new MutationObserver(()=>{if(imported&&!needsSize)$('priceImportSummary').textContent=L(`${filledCount()} بطاقة · ${pageCount()} ورقة للطباعة${state.count>=128?' · باركود مصغّر جدًا: قراءة القارئ غير مضمونة، جرّب ورقة أولًا':''}`,`${filledCount()} labels · ${pageCount()} sheets to print${state.count>=128?' · Mini barcode: scanning is not guaranteed; test one sheet first':''}`);}).observe($('copiesSummary'),{childList:true});
+  new MutationObserver(()=>{if(imported){jobIssues=[];update({table:true});}}).observe($('copiesSummary'),{childList:true});
+  function prepareImportedPrint(){
+    if(message()||formSaving||pendingDraftIndexes().length){syncButtons();return false;}
+    const original={paper:state.paper,count:state.count,orientation:state.orientation},preview=$('previewPaper'),old=preview.firstChild,oldIssues=lastIssues.slice(),pages=[],errors=[];
+    try{
+      for(const group of groups()){
+        [state.count,state.orientation]=sizes[group.size];state.paper='A4';updateLayout();
+        const items=group.rows.map(r=>state.cards[r.position]);
+        for(let i=0;i<items.length;i+=state.count){
+          lastIssues=[];const page=makePaper(items.slice(i,i+state.count));
+          // Freeze each group's physical typography before switching to the next size.
+          for(const key of document.documentElement.style)if(key.startsWith('--'))page.style.setProperty(key,document.documentElement.style.getPropertyValue(key));
+          page.dataset.labelSize=group.size;page.style.page=state.orientation==='landscape'?'priceLandscape':'pricePortrait';
+          preview.replaceChildren(page);checkFit();
+          errors.push(...lastIssues.map(issue=>group.size+': '+issue));pages.push(page);
+        }
+      }
+    }finally{Object.assign(state,original);updateLayout();lastIssues=oldIssues;preview.replaceChildren(old);}
+    jobIssues=[...new Set(errors)];$('printRoot').replaceChildren(...(jobIssues.length?[]:pages));
+    $('printSize').textContent='@page pricePortrait { size: 210mm 297mm; margin: 0; } @page priceLandscape { size: 297mm 210mm; margin: 0; }';
+    printPrepared=pages.length>0&&!jobIssues.length;syncButtons();return printPrepared;
+  }
+  window.priceImport={get active(){return active();},get blocksPrint(){return busy||imported&&!!message();},get message(){return message();},syncButtons,preparePrint:prepareImportedPrint};
   update();
 })();

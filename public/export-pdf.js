@@ -33,8 +33,9 @@ async function downloadPricePdf(){
     await window.StudioAssets.pdf();
     const Pdf=window.jspdf?.jsPDF;
     if(!Pdf||typeof window.html2canvas!=='function')throw new Error(tr('تعذر تحميل خيار التنزيل. أعد تحميل الصفحة.'));
-    const pages=Array.from(root.children),width=currentLayout.w,height=currentLayout.h,mono=state.outputMode==='bw';
-    const filename=state.language==='en'?`Price_labels_${state.brand==='nozha'?'Nozha':'Karaz'}_${state.paper}_${state.count}-labels_EN_${mono?'BW':'Color'}.pdf`:`بطاقات_${state.brand==='nozha'?'نزهة':'كرز'}_${state.paper}_${state.count}-صنف_AR_${mono?'أبيض_وأسود':'ملون'}.pdf`;
+    const pages=Array.from(root.children),width=parseFloat(pages[0].style.width),height=parseFloat(pages[0].style.height),mono=state.outputMode==='bw';
+    let filename=state.language==='en'?`Price_labels_${state.brand==='nozha'?'Nozha':'Karaz'}_${state.paper}_${state.count}-labels_EN_${mono?'BW':'Color'}.pdf`:`بطاقات_${state.brand==='nozha'?'نزهة':'كرز'}_${state.paper}_${state.count}-صنف_AR_${mono?'أبيض_وأسود':'ملون'}.pdf`;
+    if(window.priceImport?.active)filename=`Price_labels_${state.brand}_Excel_MixedSizes_${mono?'BW':'Color'}.pdf`;
     document.body.classList.add('exporting');
     originalInert=main.inert;main.inert=true;
     snapshot=Array.from(document.querySelectorAll('button,input,select,textarea')).map(element=>[element,element.disabled]);
@@ -51,12 +52,12 @@ async function downloadPricePdf(){
       status.textContent=state.language==='en'?`Preparing sheet ${i+1} of ${pages.length}…`:`تجهيز الورقة ${arabicDigits(i+1)} من ${arabicDigits(pages.length)}…`;
       // Render one page at a time to limit memory on branch managers' phones.
       for(const page of pages)page.style.display='none';
-      const page=pages[i];page.style.display='grid';page.classList.add('pdf-render-page');
+      const page=pages[i],width=parseFloat(page.style.width),height=parseFloat(page.style.height);page.style.display='grid';page.classList.add('pdf-render-page');
       const canvas=await window.html2canvas(page,{scale,backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,Math.ceil(width*96/25.4)),windowHeight:Math.max(document.documentElement.clientHeight,Math.ceil(height*96/25.4)),onclone(clone){const exportRoot=clone.getElementById('printRoot');if(exportRoot){exportRoot.style.display='block';exportRoot.style.zIndex='0';}clone.body.classList.remove('exporting');}});
       if(!canvas.width||!canvas.height)throw new Error(tr('تعذر تجهيز صورة الورقة.'));
       if(mono)grayscaleCanvas(canvas);
-      if(i>0)pdf.addPage([width,height],orientation);
-      pdf.addImage(canvas,'PNG',0,0,width,height,undefined,'FAST');
+      if(i>0)pdf.addPage([width,height],width>height?'landscape':'portrait');
+      pdf.addImage(canvas.toDataURL('image/jpeg',.98),'JPEG',0,0,width,height,undefined,'FAST');
       canvas.width=1;canvas.height=1;
     }
     await pdf.save(filename,{returnPromise:true});

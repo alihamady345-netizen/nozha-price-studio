@@ -23,9 +23,11 @@ function getLayout(settings=state){
   if(settings.count===8){cols=settings.orientation==='landscape'?4:2;rows=settings.orientation==='landscape'?2:4;}
   if(settings.count===12){cols=settings.orientation==='landscape'?4:3;rows=settings.orientation==='landscape'?3:4;}
   if(settings.count===16){cols=4;rows=4;}
+  if(settings.count===32){cols=4;rows=8;}
   if(settings.count===20){cols=settings.orientation==='landscape'?5:4;rows=settings.orientation==='landscape'?4:5;}
   const cw=(w-2*settings.margin-(cols-1)*settings.gap)/cols;
   const ch=(h-2*settings.margin-(rows-1)*settings.gap)/rows;
+  const micro=settings.count===32;
   const compact=ch<47||(cw/ch>2&&ch<65);
   const large=!compact&&ch>=120&&cw>=90;
   const nameLineHeight=ch<90?1.22:1.3;
@@ -44,7 +46,7 @@ function getLayout(settings=state){
   const unitMargin=compact?.2:large?2:.5;
   const contentW=Math.max(1,cw-2*pad-.4);
   const priceShift=Math.min(3,contentW*.02);
-  return {w,h,cols,rows,cw,ch,compact,large,pad,bw,unitMargin,nameLineHeight,priceShift,
+  const layout={w,h,cols,rows,cw,ch,compact,large,pad,bw,unitMargin,nameLineHeight,priceShift,
     logoW,logoH,
     nameSecondaryRatio:large?.74:compact?.86:.82,
     nameSize:compact?clamp(ch*.105,2.8,4.2):large?clamp(Math.min(ch*.09,cw*.14),5,27):clamp(Math.min(ch*.071,cw*.095),3.5,18),
@@ -59,6 +61,11 @@ function getLayout(settings=state){
     priceMargin:compact?.3:large?clamp(ch*.035,3,11):clamp(ch*.02,1,5),
     footerPad
   };
+  // A9 labels reserve the full width for a readable barcode and a compact price row.
+  if(micro)Object.assign(layout,{micro:true,pad:1.2,bw:cw-2.8,logoH:4.5,logoW:settings.brand==='karaz'?7.92:5.22,headerH:0,
+    nameSize:3,unitSize:2.1,priceSize:7.5,barcodeH:5,barcodeText:1.8,footerPad:.3,
+    footerH:8.5,contentW:cw-2.8,contentH:ch-11.3,promiseSize:0,promiseGap:0,priceMargin:.2,unitMargin:0});
+  return layout;
 }
 
 function updateLayout(){
@@ -148,7 +155,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
-  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div><div class="tag-promise" lang="ar" dir="rtl" translate="no"><span>الجودة</span><i aria-hidden="true">·</i><span>السعر</span><i aria-hidden="true">·</i><span>الخدمة</span></div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div><div class="tag-promise" lang="ar" dir="rtl" translate="no"><span>الجودة</span><i aria-hidden="true">·</i><span>السعر</span><i aria-hidden="true">·</i><span>الخدمة</span></div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function emptySlotMarkup(index,preview){
@@ -303,7 +310,7 @@ function checkFit(){
   for(const tag of $('previewPaper').querySelectorAll('.price-tag:not(.empty-preview)')){
     const name=tag.querySelector('.tag-name'),product=tag.querySelector('.tag-product'),body=tag.querySelector('.tag-content-inner'),price=tag.querySelector('.tag-price'),inner=tag.querySelector('.tag-price-inner'),content=tag.querySelector('.tag-content'),l=currentLayout;
     let font=l.nameSize;
-    const minimum=l.compact?2.8:l.ch<75?3.2:3.5;
+    const minimum=l.micro?2.5:l.compact?2.8:l.ch<75?3.2:3.5;
     if(body.scrollHeight){body.style.top='0';body.style.transform='none';}
     product.style.height='auto';product.style.paddingTop='0';product.style.paddingBottom='0';price.style.fontSize=l.priceSize+'mm';
     name.style.fontSize=font+'mm';balanceName(name);
@@ -317,7 +324,7 @@ function checkFit(){
     const tooTall=()=>body.scrollHeight>availableH+2||tag.scrollHeight>tag.clientHeight+2;
     const nameDominates=()=>l.ch>=120&&name.offsetHeight>availableH*.46;
     let priceFont=l.priceSize;
-    const minimumPrice=l.compact?5:6;
+    const minimumPrice=l.micro?5.5:l.compact?5:6;
     // Reserve equal edge clearance before shifting the amount slightly right.
     const priceWidth=()=>Math.max(0,price.clientWidth-2*l.priceShift*96/25.4);
     const shrinkPrice=floor=>{priceFont=Math.max(floor,priceFont-.5);price.style.fontSize=priceFont+'mm';};
@@ -364,6 +371,11 @@ function alignSheetPrices(){
 function showLayoutIssues(){
   if(window.bundleStudio?.active){window.bundleStudio.syncButtons();return;}
   if(window.designStudio?.active){window.designStudio.syncButtons();return;}
+  if(!window.offerStudio?.active&&window.priceImport?.blocksPrint){
+    $('layoutWarning').hidden=false;$('layoutWarning').textContent=window.priceImport.message;
+    for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=true;
+    return;
+  }
   $('layoutWarning').hidden=!lastIssues.length;$('layoutWarning').textContent=lastIssues.join(' ');
   const disabled=!filledCount()||!!lastIssues.length||pendingDraftIndexes().length>0||state.sample||formSaving||document.body.classList.contains('exporting');
   for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=disabled;
@@ -508,6 +520,7 @@ function preparePrint(){
   if(window.bundleStudio?.active)return window.bundleStudio.preparePrint();
   if(window.designStudio?.active)return window.designStudio.preparePrint();
   if(window.offerStudio?.active)return window.offerStudio.preparePrint();
+  if(window.priceImport?.blocksPrint){showLayoutIssues();return false;}
   const root=$('printRoot');
   if(!filledCount()||pendingDraftIndexes().length||formSaving){root.replaceChildren();return false;}
   updateLayout();

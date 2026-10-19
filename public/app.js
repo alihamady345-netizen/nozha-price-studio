@@ -24,10 +24,11 @@ function getLayout(settings=state){
   if(settings.count===12){cols=settings.orientation==='landscape'?4:3;rows=settings.orientation==='landscape'?3:4;}
   if(settings.count===16){cols=4;rows=4;}
   if(settings.count===32){cols=4;rows=8;}
+  if(settings.count===64){cols=8;rows=8;}
   if(settings.count===20){cols=settings.orientation==='landscape'?5:4;rows=settings.orientation==='landscape'?4:5;}
   const cw=(w-2*settings.margin-(cols-1)*settings.gap)/cols;
   const ch=(h-2*settings.margin-(rows-1)*settings.gap)/rows;
-  const micro=settings.count===32;
+  const micro=settings.count===32||settings.count===64;
   const compact=ch<47||(cw/ch>2&&ch<65);
   const large=!compact&&ch>=120&&cw>=90;
   const nameLineHeight=ch<90?1.22:1.3;
@@ -65,6 +66,9 @@ function getLayout(settings=state){
   if(micro)Object.assign(layout,{micro:true,pad:1.2,bw:cw-2.8,logoH:4.5,logoW:settings.brand==='karaz'?7.92:5.22,headerH:0,
     nameSize:3,unitSize:2.1,priceSize:7.5,barcodeH:5,barcodeText:1.8,footerPad:.3,
     footerH:8.5,contentW:cw-2.8,contentH:ch-11.3,promiseSize:0,promiseGap:0,priceMargin:.2,unitMargin:0});
+  if(settings.count===64)Object.assign(layout,{tiny:true,pad:.7,bw:cw-1.8,logoH:3,logoW:settings.brand==='karaz'?5.28:3.48,
+    nameSize:2,unitSize:1.5,priceSize:5,barcodeH:4,barcodeText:1.5,footerH:6.7,contentW:cw-1.8,contentH:ch-8.5,
+    priceMargin:.1,priceShift:0});
   return layout;
 }
 
@@ -91,7 +95,7 @@ function updateLayout(){
   $('cardDimensions').textContent=`${l.cw.toFixed(1)} × ${l.ch.toFixed(1)} mm`;
   $('sheetSummary').textContent=state.language==='en'?`${state.paper} · ${state.count} labels / sheet`:`${state.paper} · ${arabicDigits(state.count)} بطاقة / ورقة`;
   const warning=[];
-  if(l.ch<22||l.cw<40)warning.push(tr('هذا التقسيم صغير لعرض الاسم والسعر والباركود بوضوح. اختر ورقًا أكبر أو عدد بطاقات أقل.'));
+  if(l.ch<22||l.cw<(l.tiny?32:40))warning.push(tr('هذا التقسيم صغير لعرض الاسم والسعر والباركود بوضوح. اختر ورقًا أكبر أو عدد بطاقات أقل.'));
   lastIssues=warning;
 }
 
@@ -155,7 +159,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
-  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div><div class="tag-promise" lang="ar" dir="rtl" translate="no"><span>الجودة</span><i aria-hidden="true">·</i><span>السعر</span><i aria-hidden="true">·</i><span>الخدمة</span></div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div><div class="tag-promise" lang="ar" dir="rtl" translate="no"><span>الجودة</span><i aria-hidden="true">·</i><span>السعر</span><i aria-hidden="true">·</i><span>الخدمة</span></div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function emptySlotMarkup(index,preview){
@@ -310,7 +314,7 @@ function checkFit(){
   for(const tag of $('previewPaper').querySelectorAll('.price-tag:not(.empty-preview)')){
     const name=tag.querySelector('.tag-name'),product=tag.querySelector('.tag-product'),body=tag.querySelector('.tag-content-inner'),price=tag.querySelector('.tag-price'),inner=tag.querySelector('.tag-price-inner'),content=tag.querySelector('.tag-content'),l=currentLayout;
     let font=l.nameSize;
-    const minimum=l.micro?2.5:l.compact?2.8:l.ch<75?3.2:3.5;
+    const minimum=l.tiny?1.8:l.micro?2.5:l.compact?2.8:l.ch<75?3.2:3.5;
     if(body.scrollHeight){body.style.top='0';body.style.transform='none';}
     product.style.height='auto';product.style.paddingTop='0';product.style.paddingBottom='0';price.style.fontSize=l.priceSize+'mm';
     name.style.fontSize=font+'mm';balanceName(name);
@@ -324,7 +328,7 @@ function checkFit(){
     const tooTall=()=>body.scrollHeight>availableH+2||tag.scrollHeight>tag.clientHeight+2;
     const nameDominates=()=>l.ch>=120&&name.offsetHeight>availableH*.46;
     let priceFont=l.priceSize;
-    const minimumPrice=l.micro?5.5:l.compact?5:6;
+    const minimumPrice=l.tiny?4:l.micro?5.5:l.compact?5:6;
     // Reserve equal edge clearance before shifting the amount slightly right.
     const priceWidth=()=>Math.max(0,price.clientWidth-2*l.priceShift*96/25.4);
     const shrinkPrice=floor=>{priceFont=Math.max(floor,priceFont-.5);price.style.fontSize=priceFont+'mm';};

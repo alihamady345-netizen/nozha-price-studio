@@ -96,14 +96,15 @@ window.PriceImportData=(()=>{
     trimGrid();loadForm();render();
     $('previewSubtitle').textContent=L(`معاينة تقسيم ${size}؛ طباعة الكل تعتمد المقاس المحدد أمام كل صنف في جدول الإكسيل.`,`Preview of the ${size} layout; Print all uses each product’s size from the Excel table.`);
   }
-  async function importSheet(index){
-    const sheet=await workbook.sheet(index),config=window.PriceImportData.detect(sheet),result=window.PriceImportData.extract(sheet,config,validateProduct);
+  function importSheetData(sheet){
+    const config=window.PriceImportData.detect(sheet),result=window.PriceImportData.extract(sheet,config,validateProduct);
     // Validation completes before the existing job is replaced.
     replaceProducts(result.products);rows=state.cards.flatMap((p,position)=>p?[{position,selected:true,size:''}]:[]);imported=true;jobIssues=[];
     let summary=L(`تم إدخال ${result.products.length} صنفًا من «${filename}» · ${sheet.name} · العناوين في الصف ${config.header}.`,`Imported ${result.products.length} products from “${filename}” · ${sheet.name} · header row ${config.header}.`);
     if(result.roundedRows.length)summary+=L(` تم تقريب ${result.roundedRows.length} سعر إلى منزلتين عشريتين (الصفوف: ${result.roundedRows.join('، ')}).`,` ${result.roundedRows.length} price(s) rounded to two decimals (rows: ${result.roundedRows.join(', ')}).`);
     status.textContent=summary;status.classList.remove('is-error');
   }
+  async function importSheet(index){importSheetData(await workbook.sheet(index));}
   async function run(action){const started=performance.now();busy=true;status.textContent=L('جارٍ قراءة الإكسيل والتحقق من الأصناف…','Reading workbook and validating products…');update();try{await action();}catch(error){status.textContent=error.message;status.classList.add('is-error');}finally{busy=false;update({table:true});if(!status.classList.contains('is-error'))status.textContent+=L(` · تجهيز ${( (performance.now()-started)/1000).toFixed(1)} ثانية.`,` · Prepared in ${((performance.now()-started)/1000).toFixed(1)} s.`);}}
   input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;input.value='';run(async()=>{
     if(file.size>20*1024*1024)throw new Error('حجم الملف أكبر من ٢٠ ميجابايت. قسّم الملف.');
@@ -141,5 +142,13 @@ window.PriceImportData=(()=>{
     printPrepared=pages.length>0&&!jobIssues.length;syncButtons();return printPrepared;
   }
   window.priceImport={get active(){return active();},get blocksPrint(){return busy||imported&&!!message();},get message(){return message();},syncButtons,preparePrint:prepareImportedPrint};
+  // Allow browser assistants to use the same validated import flow as file uploads.
+  if(document.modelContext?.registerTool)document.modelContext.registerTool({
+    name:'import_fixed_price_rows',title:'استيراد جدول الأسعار الموحدة',
+    description:'Import fixed-price worksheet rows into the local print job. Replaces print cards only; never writes to the shared catalog or prints.',
+    inputSchema:{type:'object',properties:{filename:{type:'string'},rows:{type:'array',minItems:1,maxItems:1100,items:{type:'object',properties:{number:{type:'integer',minimum:1},values:{type:'array',maxItems:50,items:{type:'string'}}},required:['number','values'],additionalProperties:false}}},required:['rows'],additionalProperties:false},
+    annotations:{readOnlyHint:false,untrustedContentHint:true,consequentialHint:false},
+    execute(input){filename=String(input.filename||'Worksheet');importSheetData({name:'Sheet1',rows:input.rows});update({table:true});return {products:rows.length,needsSizes:selected().filter(r=>!r.size).length};}
+  });
   update();
 })();

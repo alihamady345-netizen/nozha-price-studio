@@ -365,11 +365,19 @@ function alignSheetPrices(){
   }));
   if(parts.length<2||parts.some(p=>!p.product.offsetHeight||!p.price.offsetHeight))return;
   // A sheet uses one price size and one price position, even with mixed name lengths.
-  const font=Math.min(...parts.map(p=>parseFloat(p.price.style.fontSize)||l.priceSize));
+  let font=Math.min(...parts.map(p=>parseFloat(p.price.style.fontSize)||l.priceSize));
   parts.forEach(p=>p.price.style.fontSize=font+'mm');
   const productH=Math.max(...parts.map(p=>p.product.offsetHeight));
-  const priceH=Math.max(...parts.map(p=>p.price.offsetHeight));
-  const groupH=productH+priceH+l.priceMargin*pxPerMm,contentH=Math.min(...parts.map(p=>p.content.clientHeight));
+  const contentH=Math.min(...parts.map(p=>p.content.clientHeight));
+  const measureGroup=()=>productH+Math.max(...parts.map(p=>p.price.offsetHeight))+l.priceMargin*pxPerMm;
+  // Equalizing two independently fitted cards can add a few pixels of rounding.
+  // Fit the shared price before rejecting the whole sheet, leaving real clearance.
+  const minimumPrice=l.mini?(state.count===128?3.8:2.7):l.tiny?4:l.micro?5.5:l.compact?5:6;
+  while(measureGroup()>contentH-2&&font>minimumPrice){
+    font=Math.max(minimumPrice,font-.25);
+    parts.forEach(p=>p.price.style.fontSize=font+'mm');
+  }
+  const groupH=measureGroup();
   if(groupH>contentH+2){addIssue(tr('تعريف الصنف أو السعر لا يتسع لهذا المقاس. اختر ورقًا أكبر أو عدد بطاقات أقل؛ لن تُطبع بيانات مقصوصة.'));return;}
   const start=Math.max(0,(contentH-groupH)/2);
   for(const p of parts){

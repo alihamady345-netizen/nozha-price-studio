@@ -75,10 +75,11 @@ function getLayout(settings=state){
     nameSize:settings.count===128?1.9:1.45,priceSize:settings.count===128?4.3:3,
     contentH:ch-5.1,contentW:cw-1.6,nameSecondaryRatio:1,priceMargin:.1,priceShift:0});
   if(settings.paper==='A4'&&settings.count===1){layout.bw=68;layout.barcodeH=11;}
-  layout.promiseIconH=layout.mini?.7:layout.tiny?1:layout.micro?1.3:compact?1.8:large?5:2.5;
+  if(!layout.micro&&!layout.mini&&settings.count>1){layout.bw=Math.max(Math.min(layout.bw,40),layout.bw*.65);layout.barcodeH=Math.max(3.2,layout.barcodeH*.65);}
+  layout.promiseIconH=layout.mini?.7:layout.tiny?1:layout.micro?1.3:compact?1.8:large?(settings.count===1?9:6):2.5;
   if(layout.micro||layout.mini){layout.promiseSize=layout.mini?.6:layout.tiny?.8:1;layout.promiseGap=.2;}
   const previousFooter=layout.footerH;
-  layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+layout.promiseIconH+layout.promiseSize*1.4+layout.promiseGap+.4;
+  layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
   return layout;
 }

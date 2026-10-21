@@ -31,3 +31,5 @@ html[lang] .tag-promise .promise-item{display:flex;flex-direction:column;align-i
 html[lang] .tag-promise .promise-item svg{display:block;height:var(--promise-icon-h);width:var(--promise-icon-h);fill:currentColor;flex-shrink:0}
 html[lang] .tag-promise i{margin:0;color:currentColor}
 html[lang] .price-tag.micro-label .tag-promise,html[lang] .price-tag.mini-label .tag-promise{display:flex}
+
+html[lang] .mini-label .tag-promise .promise-item{flex-direction:row;gap:0}

@@ -74,6 +74,12 @@ function getLayout(settings=state){
   if(settings.count>=128)Object.assign(layout,{mini:true,compact:true,pad:.6,bw:cw-1.6,headerH:0,footerH:3.5,barcodeH:1.8,barcodeText:1,footerPad:.1,
     nameSize:settings.count===128?1.9:1.45,priceSize:settings.count===128?4.3:3,
     contentH:ch-5.1,contentW:cw-1.6,nameSecondaryRatio:1,priceMargin:.1,priceShift:0});
+  if(settings.paper==='A4'&&settings.count===1){layout.bw=68;layout.barcodeH=11;}
+  layout.promiseIconH=layout.mini?.7:layout.tiny?1:layout.micro?1.3:compact?1.8:large?5:2.5;
+  if(layout.micro||layout.mini){layout.promiseSize=layout.mini?.6:layout.tiny?.8:1;layout.promiseGap=.2;}
+  const previousFooter=layout.footerH;
+  layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+layout.promiseIconH+layout.promiseSize*1.4+layout.promiseGap+.4;
+  layout.contentH-=layout.footerH-previousFooter;
   return layout;
 }
 
@@ -82,6 +88,7 @@ function updateLayout(){
   const l=currentLayout;
   const css={'--content-h':l.contentH+'mm','--content-w':l.contentW+'mm','--tag-w':l.cw+'mm','--tag-h':l.ch+'mm','--tag-pad':l.pad+'mm','--tag-logo-w':l.logoW+'mm','--tag-logo-h':l.logoH+'mm','--name-size':l.nameSize+'mm','--unit-size':l.unitSize+'mm','--unit-margin':l.unitMargin+'mm','--price-size':l.priceSize+'mm','--currency-size':l.currencySize+'mm','--barcode-w':l.bw+'mm','--barcode-h':l.barcodeH+'mm','--barcode-text':l.barcodeText+'mm','--header-h':l.headerH+'mm','--tag-footer-h':l.footerH+'mm','--product-pad':l.productPad+'mm','--price-margin':l.priceMargin+'mm','--footer-pad':l.footerPad+'mm','--tag-brand':state.brand==='nozha'?'#506a38':'#97217c','--tag-secondary':state.brand==='nozha'?'#d9ad13':'#3b982f'};
   for(const[k,v]of Object.entries(css))document.documentElement.style.setProperty(k,v);
+  document.documentElement.style.setProperty('--promise-icon-h',l.promiseIconH+'mm');
   document.documentElement.style.setProperty('--promise-size',l.promiseSize+'mm');
   document.documentElement.style.setProperty('--promise-gap',l.promiseGap+'mm');
   document.documentElement.style.setProperty('--name-line-height',String(l.nameLineHeight));
@@ -157,6 +164,12 @@ function validateProduct(raw){
   return {name,nameEn,unit,unitEn,price:Number(priceText).toFixed(2),copies,barcode,format};
 }
 
+function promiseMarkup(){
+  const quality='<path d="m16 2 3 3 4-.2 1.5 3.7L28 11l-1 4 1 4-2.5 2.5L24 25l-4-.2-4 3-4-3L8 25l-1.5-3.5L4 19l1-4-1-4 2.5-2.5L8 4.8l4 .2Z"/><circle cx="16" cy="15" r="8" fill="white"/><path d="m12 15 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m9 25-2 7 6-3 3 3 2-6 5 6 1-8"/>';
+  const price='<g transform="translate(13 12) scale(.009)"><path  d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path  d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></g><path d="M4 17 17 4h10l2 3v10L16 30Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="24" cy="9" r="2" fill="none" stroke="currentColor" stroke-width="2"/>';
+  const service='<path d="M15 17C3 10 9 2 15 7c6-5 12 3 0 10Z"/><path d="m3 23 5-3 7 2h8c3 0 3 4 0 4h-7m-8-6 3-3h5l5 4m-14 1 5 9 12-2 7-7c2-3-1-5-3-3l-5 3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="m1 23 5-3 6 11-5 3Z"/><path d="M15 1v2M4 5l2 2M27 5l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+  return `<div class="tag-promise" lang="ar" dir="ltr" translate="no"><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${quality}</svg><span>الجودة</span></span><i aria-hidden="true">·</i><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${price}</svg><span>السعر</span></span><i aria-hidden="true">·</i><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${service}</svg><span>الخدمة</span></span></div>`;
+}
 function riyalMarkup(){return `<img class="riyal-symbol" src="assets/saudi-riyal.svg" width="512" height="572" alt="${state.language==='en'?'Saudi riyal':'ريال سعودي'}">`;}
 
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
@@ -167,7 +180,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
-  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div><div class="tag-promise" lang="ar" dir="rtl" translate="no"><span>الجودة</span><i aria-hidden="true">·</i><span>السعر</span><i aria-hidden="true">·</i><span>الخدمة</span></div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function emptySlotMarkup(index,preview){

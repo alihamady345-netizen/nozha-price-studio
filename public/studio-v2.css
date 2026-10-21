@@ -14,3 +14,7 @@ textarea:focus{border-color:var(--accent)}textarea::placeholder{color:#919e97;fo
 @media(max-width:1000px){.app-header .header-brands{display:none}}
 @media(max-width:760px){.app-header{flex-wrap:wrap;gap:12px}.app-header .output-actions{width:100%;gap:9px}.app-header .output-actions>button{width:50%;min-height:44px;padding:9px 12px;font-size:14px}.sheet-output-bar{padding:15px 13px}.sheet-output-bar .output-actions>button{width:50%;font-size:14px;min-height:44px;padding:9px 10px}.sheet-output-bar p{font-size:12px;text-align:right}}
 @media print{.preview-slot{cursor:default}.slot-number,.draft-marker{display:none!important}.price-tag.slot-selected{outline:0}.empty-print{background:white}.tag-name,.tag-unit{overflow:visible!important}}
+
+/* Keep print actions in view and prevent the install button from pushing them off-screen. */
+@media screen{.app-header{position:sticky;top:0;z-index:30}.app-header .output-actions{flex-wrap:wrap}.app-header .output-actions>button{flex:1 1 auto;width:auto;min-width:0}.app-header #printTop{order:-2}.app-header #downloadTop{order:-1}}
+@media screen and (max-width:760px){.app-header .output-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.app-header .output-actions>button{width:100%}.app-header #installApp{grid-column:1/-1;min-height:32px;padding:4px 10px}.app-header #printTop,.app-header #downloadTop{white-space:normal}}

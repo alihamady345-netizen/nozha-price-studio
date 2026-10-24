@@ -33,3 +33,5 @@ html[lang] .tag-promise i{margin:0;color:currentColor}
 html[lang] .price-tag.micro-label .tag-promise,html[lang] .price-tag.mini-label .tag-promise{display:flex}
 
 html[lang] .mini-label .tag-promise .promise-item{flex-direction:row;gap:0}
+
+html[lang] .price-tag.mini-label .tag-promise{gap:.25em;max-width:100%;font-size:var(--promise-size)}

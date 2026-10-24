@@ -342,7 +342,7 @@ function checkFit(){
     name.style.fontSize=font+'mm';balanceName(name);
     // Reserve the font's painted overflow inside the product group before fitting.
     // A short line box on another platform must not trigger a false clipping alert.
-    const reserveProductInk=()=>{if(!l.large)return;product.style.height='auto';product.style.height=Math.ceil(Math.max(product.scrollHeight,product.offsetHeight))*25.4/96+'mm';};
+    const reserveProductInk=()=>{if(!l.large&&!l.mini)return;product.style.height='auto';product.style.height=Math.ceil(Math.max(product.scrollHeight,product.offsetHeight))*25.4/96+'mm';};
     reserveProductInk();
     // Large posters reserve the rendered header and barcode footer first.
     // Measure the actual content box rather than a theoretical font height.
@@ -518,7 +518,7 @@ document.querySelectorAll('[data-brand]').forEach(button=>button.addEventListene
   state.brand=button.dataset.brand;document.querySelectorAll('[data-brand]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});drawPreview();
 }));
 document.querySelectorAll('[data-count]').forEach(button=>button.addEventListener('click',()=>{
-  state.count=Number(button.dataset.count);trimGrid();state.page=0;state.selected=0;state.sample=false;
+  state.count=Number(button.dataset.count);if(state.count===64){state.orientation='landscape';$('orientation').value=state.orientation;}trimGrid();state.page=0;state.selected=0;state.sample=false;
   document.querySelectorAll('[data-count]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});loadForm();render();
 }));
 for(const id of ['paper','orientation'])$(id).addEventListener('change',()=>{state[id]=$(id).value;drawPreview();});

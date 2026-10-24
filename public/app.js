@@ -518,7 +518,7 @@ document.querySelectorAll('[data-brand]').forEach(button=>button.addEventListene
   state.brand=button.dataset.brand;document.querySelectorAll('[data-brand]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});drawPreview();
 }));
 document.querySelectorAll('[data-count]').forEach(button=>button.addEventListener('click',()=>{
-  state.count=Number(button.dataset.count);if(state.count===64){state.orientation='landscape';$('orientation').value=state.orientation;}trimGrid();state.page=0;state.selected=0;state.sample=false;
+  state.count=Number(button.dataset.count);if(state.count>=32){state.orientation=state.count===64?'landscape':'portrait';$('orientation').value=state.orientation;}trimGrid();state.page=0;state.selected=0;state.sample=false;
   document.querySelectorAll('[data-count]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});loadForm();render();
 }));
 for(const id of ['paper','orientation'])$(id).addEventListener('change',()=>{state[id]=$(id).value;drawPreview();});

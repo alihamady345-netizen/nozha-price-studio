@@ -14,7 +14,6 @@ let formSaving=false;
 let labelTemplate='standard';
 const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
 const SHELF_GRID={cw:80,ch:35,cols:2,rows:8,columnGap:3,rowGap:1};
-const SHELF_WIDE_BARCODE_MM=76;
 const isShelfTemplate=()=>labelTemplate==='shelf';
 let previousLabelLayout;
 
@@ -87,7 +86,7 @@ function getLayout(settings=state){
   const previousFooter=layout.footerH;
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
-  if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:35});
+  if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:76});
   return layout;
 }
 
@@ -205,12 +204,12 @@ function shelfTagMarkup({item, name, unit, price, nameScript, unitScript, index,
   const preview=index!==null;
   const label=state.language==='en'?'Product barcode':'باركود الصنف';
   return `<article class="price-tag shelf-label shelf-${state.brand}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">
-    <div class="shelf-brand-panel"><div class="shelf-logo-tile">${logoMarkup()}</div></div><div class="shelf-details" dir="${state.language==='en'?'ltr':'rtl'}">
+    <div class="shelf-brand-panel"><div class="shelf-logo-tile">${logoMarkup()}</div></div><div class="shelf-details">
       <div class="shelf-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>
       <div class="shelf-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}">${escapeHtml(unit)}</div>
-      <div class="shelf-bottom"><div class="shelf-trace"><svg class="tag-barcode" aria-label="${label}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>
-      <div class="shelf-amount"><div class="shelf-value" dir="ltr">${price}</div><div class="shelf-tax" dir="auto">${tr('السعر شامل الضريبة')}</div></div></div>
-    </div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+      <div class="shelf-amount"><div class="shelf-value" dir="ltr">${price}</div><div class="shelf-tax" dir="auto">${tr('السعر شامل الضريبة')}</div></div>
+    </div>
+    <div class="shelf-trace"><svg class="tag-barcode" aria-label="${label}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
@@ -290,11 +289,8 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
     svg.setAttribute('viewBox',`0 0 ${modules} ${height}`);svg.setAttribute('preserveAspectRatio','none');
     let bars='';for(let i=0;i<data.length;i++)if(data[i]==='1')bars+=`<rect x="${i+quiet}" y="0" width="1" height="${height}"/>`;
     svg.innerHTML=bars;
-    if(l.shelf&&l.bw/modules<.25){
-      tag.classList.add('shelf-wide-barcode');
-      tag.style.setProperty('--shelf-wide-barcode-width',SHELF_WIDE_BARCODE_MM+'mm');
-      tag.classList.toggle('shelf-dense-barcode',SHELF_WIDE_BARCODE_MM/modules<.25);
-    }else if(!l.mini&&l.bw/modules<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
+    if(l.shelf)tag.classList.toggle('shelf-dense-barcode',l.bw/modules<.25);
+    else if(!l.mini&&l.bw/modules<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
   if(l.shelf&&state.cutLines)appendShelfCutMarks(paper,l);
   return paper;

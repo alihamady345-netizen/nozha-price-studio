@@ -13,6 +13,7 @@ let logoCounter=0;
 let formSaving=false;
 let labelTemplate='standard';
 const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
+const SHELF_GRID={cw:80,ch:35,cols:2,rows:8,columnGap:3,rowGap:1};
 const SHELF_WIDE_BARCODE_MM=76;
 const isShelfTemplate=()=>labelTemplate==='shelf';
 let previousLabelLayout;
@@ -86,7 +87,7 @@ function getLayout(settings=state){
   const previousFooter=layout.footerH;
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
-  if(isShelfTemplate())Object.assign(layout,{shelf:true,cols:2,rows:8,cw:80,ch:35,bw:35});
+  if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:35});
   return layout;
 }
 
@@ -239,11 +240,41 @@ function draftProduct(raw){
   return {name:raw.name||'',nameEn:raw.nameEn||'',unit:raw.unit||'',unitEn:raw.unitEn||'',price:/^\d{1,7}(?:\.\d{1,2})?$/.test(price)?Number(price).toFixed(2):'',barcode,format};
 }
 
+function appendShelfCutMarks(paper,l){
+  const width=l.cols*l.cw+(l.cols-1)*l.columnGap;
+  const height=l.rows*l.ch+(l.rows-1)*l.rowGap;
+  const left=(l.w-width)/2,top=(l.h-height)/2,right=left+width,bottom=top+height;
+  const marks=document.createElement('div'),segments=[];
+  marks.className='shelf-cut-marks';marks.setAttribute('aria-hidden','true');
+  const line=(x,y,w,h)=>segments.push(`<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${h}mm"></i>`);
+  const thickness=.2;
+  for(let row=0;row<l.rows;row++){
+    const y=top+row*(l.ch+l.rowGap);
+    for(const edge of [y,y+l.ch]){
+      line(left-4,edge-thickness/2,3.5,thickness);
+      line(right+.5,edge-thickness/2,3.5,thickness);
+      line(left+l.cw+.25,edge-thickness/2,l.columnGap-.5,thickness);
+    }
+  }
+  for(let column=0;column<l.cols;column++){
+    const x=left+column*(l.cw+l.columnGap);
+    for(const edge of [x,x+l.cw]){
+      line(edge-thickness/2,top-2.5,thickness,2.15);
+      line(edge-thickness/2,bottom+.35,thickness,2.15);
+      for(let row=1;row<l.rows;row++){
+        line(edge-thickness/2,top+row*(l.ch+l.rowGap)-l.rowGap+.15,thickness,l.rowGap-.3);
+      }
+    }
+  }
+  marks.innerHTML=segments.join('');paper.append(marks);
+}
+
 function makePaper(items,{preview=false,offset=0,sample=false}={}){
   const l=currentLayout;
   const paper=document.createElement('div');paper.className=l.shelf?'paper shelf-paper':'paper';
   paper.dir=state.language==='en'?'ltr':'rtl';
   Object.assign(paper.style,{width:l.w+'mm',height:l.h+'mm',padding:state.margin+'mm',gap:state.gap+'mm',gridTemplateColumns:`repeat(${l.cols}, ${l.cw}mm)`,gridTemplateRows:`repeat(${l.rows}, ${l.ch}mm)`});
+  if(l.shelf){paper.style.columnGap=l.columnGap+'mm';paper.style.rowGap=l.rowGap+'mm';}
   paper.innerHTML=Array.from({length:state.count},(_,i)=>{
     const index=offset+i;
     if(preview&&!sample&&hasPendingDraft(index))return tagMarkup(draftProduct(state.drafts[index]),index,{draft:true});
@@ -265,6 +296,7 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
       tag.classList.toggle('shelf-dense-barcode',SHELF_WIDE_BARCODE_MM/modules<.25);
     }else if(!l.mini&&l.bw/modules<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
+  if(l.shelf&&state.cutLines)appendShelfCutMarks(paper,l);
   return paper;
 }
 

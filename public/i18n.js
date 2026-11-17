@@ -12,7 +12,7 @@ const englishText=new Map(Object.entries({
   'تقسيم الورقة':'Labels per sheet','مقاس البطاقة':'Label size','ألوان الورقة':'Sheet colors',
   'نوع الفورمة':'Label template','فورمة عادية':'Standard','فورمة بعلامة صح':'With check mark','فورمة صح حول السعر':'Check mark around price',
   'فورمة للشيلف':'Shelf label','السعر شامل الضريبة':'Price incl. VAT',
-  'A4 عمودي · ١٦ بطاقة · عمودان × ٨ صفوف. اطبع بالحجم الفعلي 100%.':'A4 portrait · 16 labels · 2 columns × 8 rows. Print at actual size (100%).',
+  'A4 عمودي · ١٦ بطاقة · عمودان × ٨ صفوف. الفاصل بين العمودين ٣ مم وبين الصفوف ١ مم. اطبع بالحجم الفعلي 100%.':'A4 portrait · 16 labels · 2 columns × 8 rows. 3 mm between columns and 1 mm between rows. Print at actual size (100%).',
   'تعريف الصنف أو السعر لا يتسع لبطاقة الشيلف. اختصر الاسم أو الوحدة وراجع السعر.':'The product details or price do not fit the shelf label. Shorten the name or unit and check the price.',
   'الكود الطويل محفوظ بالكامل. جرّب قراءته بالماسح على نسخة واحدة قبل طباعة الكمية.':'The long code is preserved. Test one printed label with the scanner before printing the full batch.',
   'ملوّن':'Color','أبيض وأسود':'Black & white','هوامش الطباعة وخطوط القص':'Print margins & cut lines',

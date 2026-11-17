@@ -181,7 +181,8 @@ function labelCheckMarkup(){
     ?Math.min(4,cw*.14,ch*.12)
     :Math.min(14,cw*.13,ch*.13,headerH*.72);
   const color=state.outputMode==='bw'?'#111111':'#245436';
-  return `<svg class="tag-check-mark" style="width:${size}mm;height:${size}mm" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${mini?'':`<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="1.5"/>`}<path d="m6.5 12 3.6 3.6 7.4-7.6" fill="none" stroke="${color}" stroke-width="${mini?3.1:2.5}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const icon=`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="${color}">${mini?'':'<circle cx="12" cy="12" r="10" stroke-width="1.5"/>'}<path d="m6.5 12 3.6 3.6 7.4-7.6" stroke-width="${mini?3.1:2.5}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<img class="tag-check-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(icon)}" alt="" aria-hidden="true">`;
 }
 
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){

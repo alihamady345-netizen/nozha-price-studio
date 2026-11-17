@@ -133,3 +133,21 @@ html[lang] .price-tag.compact.with-check .tag-content{
   margin-top:var(--check-band);
   height:calc(var(--content-h) - var(--check-band));
 }
+
+.label-template-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.label-template-switch>button{width:100%}
+.label-template-switch>button[data-label-template="price-frame"]{grid-column:1/-1}
+.frame-option-icon{background:var(--accent);color:#fff;border-radius:4px;width:18px;height:18px;line-height:18px;text-align:center;font:700 14px/18px Arial,sans-serif}
+html[lang] .price-tag .tag-price.price-frame{
+  --frame-inset:min(2.4mm,calc(var(--tag-w) * .024));
+  display:flex;align-items:center;gap:var(--frame-inset);padding:0 var(--frame-inset);
+}
+html[lang] .price-tag .tag-price.price-frame::before{
+  background:var(--tag-soft);
+  border:min(.9mm,calc(var(--tag-h) * .014)) solid var(--price-frame-ink);
+  border-radius:min(3.2mm,calc(var(--tag-h) * .05));
+}
+html[lang] .price-tag .tag-price.price-frame::after{display:none}
+.price-frame-mark{display:block;flex:none}
+.price-frame-amount{display:block;flex:1;min-width:0;text-align:center}
+html[lang] .price-tag .price-frame .tag-price-inner{left:0}

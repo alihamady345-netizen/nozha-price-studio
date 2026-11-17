@@ -185,6 +185,16 @@ function labelCheckMarkup(){
   return `<img class="tag-check-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(icon)}" alt="" aria-hidden="true">`;
 }
 
+function priceMarkup(price){
+  const amount=`<span class="tag-price-inner">${price}</span>`;
+  if(labelTemplate!=='price-frame')return `<div class="tag-price">${amount}</div>`;
+  const {cw,ch}=currentLayout;
+  const size=Math.min(24,cw*.145,ch*.21);
+  const ink=state.outputMode==='bw'?'#111111':state.brand==='nozha'?'#245436':'#752264';
+  const badge=`<svg xmlns="http://www.w3.org/2000/svg" width="288" height="288" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="${ink}"/><path d="m5.6 12.1 4.4 4.4 8.5-9" fill="none" stroke="#fff" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<div class="tag-price price-frame" style="--price-frame-ink:${ink}"><img class="price-frame-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(badge)}" alt="" aria-hidden="true"><span class="price-frame-amount">${amount}</span></div>`;
+}
+
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const preview=index!==null;
   const name=latinDigits(productText(item)).replace(/٫/g,'.'),unit=latinDigits(productText(item,'unit')).replace(/٫/g,'.'),number=displayDigits(index%state.count+1);
@@ -194,7 +204,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
   const check=labelCheckMarkup();
-  return `<article class="price-tag${check?' with-check':''}${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${check}<div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  return `<article class="price-tag${check?' with-check':''}${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${check}<div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function emptySlotMarkup(index,preview){
@@ -365,7 +375,8 @@ function checkFit(){
     let priceFont=l.priceSize;
     const minimumPrice=l.mini?(state.count===128?3.8:2.7):l.tiny?4:l.micro?5.5:l.compact?5:6;
     // Reserve equal edge clearance before shifting the amount slightly right.
-    const priceWidth=()=>Math.max(0,price.clientWidth-2*l.priceShift*96/25.4);
+    const frameAmount=tag.querySelector('.price-frame-amount');
+    const priceWidth=()=>frameAmount?.clientWidth??Math.max(0,price.clientWidth-2*l.priceShift*96/25.4);
     const shrinkPrice=floor=>{priceFont=Math.max(floor,priceFont-.5);price.style.fontSize=priceFont+'mm';};
     const shrinkName=()=>{font=Math.max(minimum,font-.15);name.style.fontSize=font+'mm';balanceName(name);reserveProductInk();};
     // Fit the price width first; a wide number must not needlessly shrink the name.

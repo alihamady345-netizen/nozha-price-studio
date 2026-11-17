@@ -10,7 +10,7 @@ const englishText=new Map(Object.entries({
   'تنزيل PDF':'Download PDF','طباعة الآن':'Print now','إعداد البطاقة':'Label setup','العلامة التجارية':'Brand',
   'مقاس الورق':'Paper size','اتجاه الورق':'Orientation','عمودي':'Portrait','أفقي':'Landscape',
   'تقسيم الورقة':'Labels per sheet','مقاس البطاقة':'Label size','ألوان الورقة':'Sheet colors',
-  'نوع الفورمة':'Label template','فورمة عادية':'Standard','فورمة بعلامة صح':'With check mark',
+  'نوع الفورمة':'Label template','فورمة عادية':'Standard','فورمة بعلامة صح':'With check mark','فورمة صح حول السعر':'Check mark around price',
   'ملوّن':'Color','أبيض وأسود':'Black & white','هوامش الطباعة وخطوط القص':'Print margins & cut lines',
   'الهامش (مم)':'Margin (mm)','الفاصل (مم)':'Gap (mm)','إظهار خطوط القص':'Show cut lines',
   'اختر مكان البطاقة، ثم اكتب صنفها.':'Select a label position, then enter its product.',

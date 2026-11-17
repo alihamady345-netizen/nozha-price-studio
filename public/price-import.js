@@ -119,6 +119,7 @@ window.PriceImportData=(()=>{
   $('priceImportSelectAll').addEventListener('change',event=>{rows.forEach(r=>r.selected=event.target.checked);jobIssues=[];update({table:true});});
   $('priceImportPrint').addEventListener('click',printNow);$('priceImportPdf').addEventListener('click',downloadPricePdf);
   document.addEventListener('pricing:mode',update);
+  document.addEventListener('pricing:label-template',()=>{if(imported){jobIssues=[];update();}});
   new MutationObserver(()=>{if(imported){jobIssues=[];update({table:true});}}).observe($('copiesSummary'),{childList:true});
   function prepareImportedPrint(){
     if(message()||formSaving||pendingDraftIndexes().length){syncButtons();return false;}

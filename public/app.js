@@ -11,6 +11,7 @@ let lastIssues=[];
 let printPrepared=false;
 let logoCounter=0;
 let formSaving=false;
+let labelTemplate='standard';
 
 function getLayout(settings=state){
   let [w,h]=PAPER[settings.paper];
@@ -173,6 +174,16 @@ function promiseMarkup(){
 }
 function riyalMarkup(){return `<img class="riyal-symbol" src="assets/saudi-riyal.svg" width="512" height="572" alt="${state.language==='en'?'Saudi riyal':'ريال سعودي'}">`;}
 
+function labelCheckMarkup(){
+  if(labelTemplate!=='check')return '';
+  const {cw,ch,compact,headerH,mini}=currentLayout;
+  const size=compact
+    ?Math.min(4,cw*.14,ch*.12)
+    :Math.min(14,cw*.13,ch*.13,headerH*.72);
+  const color=state.outputMode==='bw'?'#111111':'#245436';
+  return `<svg class="tag-check-mark" style="width:${size}mm;height:${size}mm" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${mini?'':`<circle cx="12" cy="12" r="10" fill="none" stroke="${color}" stroke-width="1.5"/>`}<path d="m6.5 12 3.6 3.6 7.4-7.6" fill="none" stroke="${color}" stroke-width="${mini?3.1:2.5}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const preview=index!==null;
   const name=latinDigits(productText(item)).replace(/٫/g,'.'),unit=latinDigits(productText(item,'unit')).replace(/٫/g,'.'),number=displayDigits(index%state.count+1);
@@ -181,7 +192,8 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
-  return `<article class="price-tag${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  const check=labelCheckMarkup();
+  return `<article class="price-tag${check?' with-check':''}${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${check}<div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div><div class="tag-price"><span class="tag-price-inner">${price}</span></div></div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function emptySlotMarkup(index,preview){
@@ -528,6 +540,14 @@ $('prevPage').addEventListener('click',()=>selectSlot((state.page-1)*state.count
 $('nextPage').addEventListener('click',()=>selectSlot((state.page+1)*state.count));
 $('addPage').addEventListener('click',()=>{if(state.cards.length>=1020){toast(tr('الحد في مهمة الطباعة الواحدة ١٠٠٠ بطاقة'));return;}const start=state.cards.length;growCards(start+state.count);selectSlot(start);});
 $('sampleToggle').addEventListener('click',()=>{state.sample=!state.sample;drawPreview();});
+const labelTemplateButtons=document.querySelectorAll('[data-label-template]');
+labelTemplateButtons.forEach(button=>button.addEventListener('click',()=>{
+  if(labelTemplate===button.dataset.labelTemplate)return;
+  labelTemplate=button.dataset.labelTemplate;
+  labelTemplateButtons.forEach(other=>{const selected=other===button;other.classList.toggle('selected',selected);other.setAttribute('aria-pressed',String(selected));});
+  $('downloadStatus').textContent='';drawPreview();
+  document.dispatchEvent(new Event('pricing:label-template'));
+}));
 document.querySelectorAll('[data-output-mode]').forEach(button=>button.addEventListener('click',()=>{
   state.outputMode=button.dataset.outputMode;
   document.querySelectorAll('[data-output-mode]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});

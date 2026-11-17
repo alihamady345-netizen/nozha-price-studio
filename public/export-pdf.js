@@ -36,6 +36,7 @@ async function downloadPricePdf(){
     const pages=Array.from(root.children),width=parseFloat(pages[0].style.width),height=parseFloat(pages[0].style.height),mono=state.outputMode==='bw';
     let filename=state.language==='en'?`Price_labels_${state.brand==='nozha'?'Nozha':'Karaz'}_${state.paper}_${state.count}-labels_EN_${mono?'BW':'Color'}.pdf`:`بطاقات_${state.brand==='nozha'?'نزهة':'كرز'}_${state.paper}_${state.count}-صنف_AR_${mono?'أبيض_وأسود':'ملون'}.pdf`;
     if(window.priceImport?.active)filename=`Price_labels_${state.brand}_Excel_MixedSizes_${mono?'BW':'Color'}.pdf`;
+    if(labelTemplate==='check')filename=filename.replace(/\.pdf$/u,state.language==='en'?'_Check.pdf':'_علامة_صح.pdf');
     document.body.classList.add('exporting');
     originalInert=main.inert;main.inert=true;
     snapshot=Array.from(document.querySelectorAll('button,input,select,textarea')).map(element=>[element,element.disabled]);

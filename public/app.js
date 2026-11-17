@@ -13,6 +13,7 @@ let logoCounter=0;
 let formSaving=false;
 let labelTemplate='standard';
 const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
+const SHELF_WIDE_BARCODE_MM=76;
 const isShelfTemplate=()=>labelTemplate==='shelf';
 let previousLabelLayout;
 
@@ -254,10 +255,15 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
     if(!tag.dataset.barcode)return;
     const data=barcodeData(tag.dataset.barcode,tag.dataset.format),svg=tag.querySelector('.tag-barcode');
     const quiet=10,height=50;
-    svg.setAttribute('viewBox',`0 0 ${data.length+2*quiet} ${height}`);svg.setAttribute('preserveAspectRatio','none');
+    const modules=data.length+2*quiet;
+    svg.setAttribute('viewBox',`0 0 ${modules} ${height}`);svg.setAttribute('preserveAspectRatio','none');
     let bars='';for(let i=0;i<data.length;i++)if(data[i]==='1')bars+=`<rect x="${i+quiet}" y="0" width="1" height="${height}"/>`;
     svg.innerHTML=bars;
-    if(!l.mini&&l.bw/(data.length+2*quiet)<.25)addIssue(tr(l.shelf?'الباركود طويل لبطاقة الشيلف. راجع رمز الصنف قبل الطباعة.':'الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
+    if(l.shelf&&l.bw/modules<.25){
+      tag.classList.add('shelf-wide-barcode');
+      tag.style.setProperty('--shelf-wide-barcode-width',SHELF_WIDE_BARCODE_MM+'mm');
+      tag.classList.toggle('shelf-dense-barcode',SHELF_WIDE_BARCODE_MM/modules<.25);
+    }else if(!l.mini&&l.bw/modules<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
   return paper;
 }
@@ -290,6 +296,7 @@ function drawPreview(){
   const start=state.page*state.count,items=state.cards.slice(start,start+state.count);
   const saved=items.filter(Boolean).length,hasDraft=pendingDraftIndexes().length>0;
   $('previewPaper').replaceChildren(makePaper(items,{preview:true,offset:start,sample:state.sample}));
+  $('shelfBarcodeNotice').hidden=!$('previewPaper').querySelector('.shelf-dense-barcode');
   $('previewBadge').textContent=state.sample?tr('مثال توضيحي'):state.language==='en'?`${saved} of ${state.count} labels`:`${arabicDigits(saved)} من ${arabicDigits(state.count)} بطاقات`;
   $('previewBadge').classList.toggle('ready',saved>0&&!state.sample);
   $('previewSubtitle').textContent=state.sample?tr('البيانات المعروضة مثال للتصميم ولا تدخل ضمن الطباعة'):hasDraft?tr('احفظ التعديلات الحالية لتجهيز الطباعة'):tr('يمكن طباعة صنف واحد؛ الخانات غير المعبأة تظل فارغة.');

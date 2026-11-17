@@ -14,7 +14,7 @@ const englishText=new Map(Object.entries({
   'فورمة للشيلف':'Shelf label','السعر شامل الضريبة':'Price incl. VAT',
   'A4 عمودي · ١٦ بطاقة · عمودان × ٨ صفوف. اطبع بالحجم الفعلي 100%.':'A4 portrait · 16 labels · 2 columns × 8 rows. Print at actual size (100%).',
   'تعريف الصنف أو السعر لا يتسع لبطاقة الشيلف. اختصر الاسم أو الوحدة وراجع السعر.':'The product details or price do not fit the shelf label. Shorten the name or unit and check the price.',
-  'الباركود طويل لبطاقة الشيلف. راجع رمز الصنف قبل الطباعة.':'The barcode is too long for the shelf label. Check the product code before printing.',
+  'الكود الطويل محفوظ بالكامل. جرّب قراءته بالماسح على نسخة واحدة قبل طباعة الكمية.':'The long code is preserved. Test one printed label with the scanner before printing the full batch.',
   'ملوّن':'Color','أبيض وأسود':'Black & white','هوامش الطباعة وخطوط القص':'Print margins & cut lines',
   'الهامش (مم)':'Margin (mm)','الفاصل (مم)':'Gap (mm)','إظهار خطوط القص':'Show cut lines',
   'اختر مكان البطاقة، ثم اكتب صنفها.':'Select a label position, then enter its product.',

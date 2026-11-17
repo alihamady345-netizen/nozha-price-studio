@@ -38,6 +38,7 @@ async function downloadPricePdf(){
     if(window.priceImport?.active)filename=`Price_labels_${state.brand}_Excel_MixedSizes_${mono?'BW':'Color'}.pdf`;
     if(labelTemplate==='check')filename=filename.replace(/\.pdf$/u,state.language==='en'?'_Check.pdf':'_علامة_صح.pdf');
     if(labelTemplate==='price-frame')filename=filename.replace(/\.pdf$/u,state.language==='en'?'_Price_Frame.pdf':'_صح_حول_السعر.pdf');
+    if(isShelfTemplate())filename=`Shelf_${state.brand}_80x35mm_A4_${mono?'BW':'Color'}.pdf`;
     document.body.classList.add('exporting');
     originalInert=main.inert;main.inert=true;
     snapshot=Array.from(document.querySelectorAll('button,input,select,textarea')).map(element=>[element,element.disabled]);

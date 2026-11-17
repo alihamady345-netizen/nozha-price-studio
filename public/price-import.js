@@ -63,8 +63,13 @@ window.PriceImportData=(()=>{
   let workbook=null,filename='',busy=false,imported=false,rows=[],jobIssues=[];
   const active=()=>(imported||busy)&&!window.offerStudio?.active&&!window.designStudio?.active&&!window.bundleStudio?.active;
   const selected=()=>rows.filter(r=>r.selected&&state.cards[r.position]);
-  const groups=()=>Object.keys(sizes).map(size=>({size,rows:selected().filter(r=>r.size===size)})).filter(g=>g.rows.length);
-  function message(){if(busy)return L('جارٍ التحقق من الإكسيل…','Validating workbook…');if(!selected().length)return L('حدد صنفًا واحدًا على الأقل.','Select at least one product.');const missing=selected().filter(r=>!r.size).length;return missing?L(`اختر مقاس ${missing} صنف قبل الطباعة.`,`Choose a size for ${missing} product(s) before printing.`):jobIssues.join(' ');}
+  const groupLayout=size=>size==='shelf'?[SHELF_PRINT.count,SHELF_PRINT.orientation]:sizes[size];
+  const sizeLabel=size=>size==='shelf'?tr('فورمة للشيلف'):size;
+  function groups(){
+    const chosen=selected();
+    return (isShelfTemplate()?[{size:'shelf',rows:chosen}]:Object.keys(sizes).map(size=>({size,rows:chosen.filter(r=>r.size===size)}))).filter(g=>g.rows.length);
+  }
+  function message(){if(busy)return L('جارٍ التحقق من الإكسيل…','Validating workbook…');if(!selected().length)return L('حدد صنفًا واحدًا على الأقل.','Select at least one product.');const missing=isShelfTemplate()?0:selected().filter(r=>!r.size).length;return missing?L(`اختر مقاس ${missing} صنف قبل الطباعة.`,`Choose a size for ${missing} product(s) before printing.`):jobIssues.join(' ');}
   function syncButtons(){
     const issue=message(),disabled=!!issue||formSaving||pendingDraftIndexes().length>0||state.sample||document.body.classList.contains('exporting');
     for(const id of ['priceImportPrint','priceImportPdf'])$(id).disabled=disabled;
@@ -72,24 +77,29 @@ window.PriceImportData=(()=>{
       for(const id of ['printTop','printBottom','downloadTop','downloadBottom'])$(id).disabled=disabled;
       $('layoutWarning').hidden=!issue;$('layoutWarning').textContent=issue;
     }
-    $('priceImportReady').textContent=issue||L('جاهز: تُجمع الأصناف في صفحات حسب مقاس كل صنف.','Ready: products are grouped into sheets by their selected sizes.');
+    $('priceImportReady').textContent=issue||(isShelfTemplate()?L('جاهز: بطاقات الشيلف ٨ × ٣٫٥ سم، ١٦ بطاقة في ورقة A4.','Ready: 80 × 35 mm shelf labels, 16 per A4 sheet.'):L('جاهز: تُجمع الأصناف في صفحات حسب مقاس كل صنف.','Ready: products are grouped into sheets by their selected sizes.'));
   }
   function renderRows(){
-    $('priceImportRows').innerHTML=rows.filter(r=>state.cards[r.position]).map((r,i)=>{const p=state.cards[r.position];return `<tr><td><input type="checkbox" data-price-select="${r.position}" aria-label="تحديد ${escapeHtml(p.name||p.nameEn)}" ${r.selected?'checked':''}></td><td>${i+1}</td><td><strong>${escapeHtml(productText(p))}</strong><small>${escapeHtml(productText(p,'unit'))}</small><b dir="ltr">${escapeHtml(p.barcode)}</b></td><td dir="ltr">${escapeHtml(p.price)}</td><td><select data-price-row-size="${r.position}" aria-label="مقاس ${escapeHtml(p.name||p.nameEn)}"><option value="">${L('اختر المقاس','Choose size')}</option>${Object.keys(sizes).map(s=>`<option value="${s}" ${r.size===s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`;}).join('');
+    $('priceImportRows').innerHTML=rows.filter(r=>state.cards[r.position]).map((r,i)=>{const p=state.cards[r.position];return `<tr><td><input type="checkbox" data-price-select="${r.position}" aria-label="تحديد ${escapeHtml(p.name||p.nameEn)}" ${r.selected?'checked':''}></td><td>${i+1}</td><td><strong>${escapeHtml(productText(p))}</strong><small>${escapeHtml(productText(p,'unit'))}</small><b dir="ltr">${escapeHtml(p.barcode)}</b></td><td dir="ltr">${escapeHtml(p.price)}</td><td>${isShelfTemplate()?'<b dir="ltr">80 × 35 mm</b>':`<select data-price-row-size="${r.position}" aria-label="مقاس ${escapeHtml(p.name||p.nameEn)}"><option value="">${L('اختر المقاس','Choose size')}</option>${Object.keys(sizes).map(s=>`<option value="${s}" ${r.size===s?'selected':''}>${s}</option>`).join('')}</select>`}</td></tr>`;}).join('');
   }
   function update({table=false}={}){
+    root.querySelector('.price-import-bottom').hidden=isShelfTemplate();
+    $('priceImportIntro').textContent=isShelfTemplate()
+      ?L('ارفع الإكسيل، حدد الأصناف، واطبع بطاقات الشيلف بالمقاس الثابت.','Upload Excel, select the products, and print at the fixed shelf label size.')
+      :L('ارفع الإكسيل، حدد مقاس كل صنف، ثم اطبع الكل.','Upload Excel, set each product’s size, then print all.');
     if(imported){const known=new Set(rows.map(r=>r.position));state.cards.forEach((p,position)=>{if(p&&!known.has(position))rows.push({position,selected:true,size:''});});}
     input.disabled=busy;sheetSelect.disabled=busy;$('priceImportJob').hidden=!imported;
     root.querySelectorAll('[data-price-size]').forEach(b=>b.disabled=busy);
     if(table)renderRows();
-    const plan=groups(),count=selected().length,sheets=plan.reduce((n,g)=>n+Math.ceil(g.rows.length/sizes[g.size][0]),0);
+    const plan=groups(),count=selected().length,sheets=plan.reduce((n,g)=>n+Math.ceil(g.rows.length/groupLayout(g.size)[0]),0);
     $('priceImportSummary').textContent=L(`${count} بطاقة محددة · ${sheets} ورقة طباعة`,`${count} selected labels · ${sheets} print sheets`);
-    $('priceImportGroups').innerHTML=plan.map(g=>`<span><b>${g.size}</b> · ${g.rows.length} ${L('صنف','products')} · ${Math.ceil(g.rows.length/sizes[g.size][0])} ${L('ورقة','sheets')}</span>`).join('');
-    $('priceImportMiniNote').hidden=!plan.some(g=>sizes[g.size][0]>=128);
+    $('priceImportGroups').innerHTML=plan.map(g=>`<span><b>${sizeLabel(g.size)}</b> · ${g.rows.length} ${L('صنف','products')} · ${Math.ceil(g.rows.length/groupLayout(g.size)[0])} ${L('ورقة','sheets')}</span>`).join('');
+    $('priceImportMiniNote').hidden=!plan.some(g=>groupLayout(g.size)[0]>=128);
     const all=$('priceImportSelectAll'),populated=rows.filter(r=>state.cards[r.position]);all.checked=!!populated.length&&populated.every(r=>r.selected);all.indeterminate=count>0&&count<populated.length;
     if(active())syncButtons();
   }
   function previewSize(size){
+    if(isShelfTemplate())return;
     [state.count,state.orientation]=sizes[size];state.paper='A4';state.page=0;state.selected=0;state.sample=false;
     $('paper').value=state.paper;$('orientation').value=state.orientation;
     document.querySelectorAll('[data-count]').forEach(b=>{const on=Number(b.dataset.count)===state.count;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
@@ -119,14 +129,14 @@ window.PriceImportData=(()=>{
   $('priceImportSelectAll').addEventListener('change',event=>{rows.forEach(r=>r.selected=event.target.checked);jobIssues=[];update({table:true});});
   $('priceImportPrint').addEventListener('click',printNow);$('priceImportPdf').addEventListener('click',downloadPricePdf);
   document.addEventListener('pricing:mode',update);
-  document.addEventListener('pricing:label-template',()=>{if(imported){jobIssues=[];update();}});
+  document.addEventListener('pricing:label-template',()=>{jobIssues=[];update({table:imported});});
   new MutationObserver(()=>{if(imported){jobIssues=[];update({table:true});}}).observe($('copiesSummary'),{childList:true});
   function prepareImportedPrint(){
     if(message()||formSaving||pendingDraftIndexes().length){syncButtons();return false;}
     const original={paper:state.paper,count:state.count,orientation:state.orientation},preview=$('previewPaper'),old=preview.firstChild,oldIssues=lastIssues.slice(),pages=[],errors=[];
     try{
       for(const group of groups()){
-        [state.count,state.orientation]=sizes[group.size];state.paper='A4';updateLayout();
+        [state.count,state.orientation]=groupLayout(group.size);state.paper='A4';updateLayout();
         const items=group.rows.map(r=>state.cards[r.position]);
         for(let i=0;i<items.length;i+=state.count){
           lastIssues=[];const page=makePaper(items.slice(i,i+state.count));
@@ -134,7 +144,7 @@ window.PriceImportData=(()=>{
           for(const key of document.documentElement.style)if(key.startsWith('--'))page.style.setProperty(key,document.documentElement.style.getPropertyValue(key));
           page.dataset.labelSize=group.size;page.style.page=state.orientation==='landscape'?'priceLandscape':'pricePortrait';
           preview.replaceChildren(page);checkFit();
-          errors.push(...lastIssues.map(issue=>group.size+': '+issue));pages.push(page);
+          errors.push(...lastIssues.map(issue=>sizeLabel(group.size)+': '+issue));pages.push(page);
         }
       }
     }finally{Object.assign(state,original);updateLayout();lastIssues=oldIssues;preview.replaceChildren(old);}
@@ -149,7 +159,7 @@ window.PriceImportData=(()=>{
     description:'Import fixed-price worksheet rows into the local print job. Replaces print cards only; never writes to the shared catalog or prints.',
     inputSchema:{type:'object',properties:{filename:{type:'string'},rows:{type:'array',minItems:1,maxItems:1100,items:{type:'object',properties:{number:{type:'integer',minimum:1},values:{type:'array',maxItems:50,items:{type:'string'}}},required:['number','values'],additionalProperties:false}}},required:['rows'],additionalProperties:false},
     annotations:{readOnlyHint:false,untrustedContentHint:true,consequentialHint:false},
-    execute(input){filename=String(input.filename||'Worksheet');importSheetData({name:'Sheet1',rows:input.rows});update({table:true});return {products:rows.length,needsSizes:selected().filter(r=>!r.size).length};}
+    execute(input){filename=String(input.filename||'Worksheet');importSheetData({name:'Sheet1',rows:input.rows});update({table:true});return {products:rows.length,needsSizes:isShelfTemplate()?0:selected().filter(r=>!r.size).length};}
   });
   update();
 })();

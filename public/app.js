@@ -12,6 +12,9 @@ let printPrepared=false;
 let logoCounter=0;
 let formSaving=false;
 let labelTemplate='standard';
+const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
+const isShelfTemplate=()=>labelTemplate==='shelf';
+let previousLabelLayout;
 
 function getLayout(settings=state){
   let [w,h]=PAPER[settings.paper];
@@ -82,6 +85,7 @@ function getLayout(settings=state){
   const previousFooter=layout.footerH;
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
+  if(isShelfTemplate())Object.assign(layout,{shelf:true,cols:2,rows:8,cw:80,ch:35,bw:35});
   return layout;
 }
 
@@ -195,6 +199,18 @@ function priceMarkup(price){
   return `<div class="tag-price price-frame" style="--price-frame-ink:${ink}"><img class="price-frame-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(badge)}" alt="" aria-hidden="true"><span class="price-frame-amount">${amount}</span></div>`;
 }
 
+function shelfTagMarkup({item, name, unit, price, nameScript, unitScript, index, editLabel, draft, sample}){
+  const preview=index!==null;
+  const label=state.language==='en'?'Product barcode':'باركود الصنف';
+  return `<article class="price-tag shelf-label shelf-${state.brand}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">
+    <div class="shelf-brand-panel"><div class="shelf-logo-tile">${logoMarkup()}</div></div><div class="shelf-details" dir="${state.language==='en'?'ltr':'rtl'}">
+      <div class="shelf-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>
+      <div class="shelf-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}">${escapeHtml(unit)}</div>
+      <div class="shelf-bottom"><div class="shelf-trace"><svg class="tag-barcode" aria-label="${label}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>
+      <div class="shelf-amount"><div class="shelf-value" dir="ltr">${price}</div><div class="shelf-tax" dir="auto">${tr('السعر شامل الضريبة')}</div></div></div>
+    </div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+}
+
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const preview=index!==null;
   const name=latinDigits(productText(item)).replace(/٫/g,'.'),unit=latinDigits(productText(item,'unit')).replace(/٫/g,'.'),number=displayDigits(index%state.count+1);
@@ -203,6 +219,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
+  if(currentLayout.shelf)return shelfTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   const check=labelCheckMarkup();
   return `<article class="price-tag${check?' with-check':''}${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${check}<div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
@@ -210,6 +227,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
 function emptySlotMarkup(index,preview){
   if(!preview)return `<div class="empty-print${state.cutLines?'':' no-cut'}"></div>`;
   const n=displayDigits(index%state.count+1),label=state.language==='en'?`Fill label ${n}`:`تعبئة البطاقة ${n}`;
+  if(currentLayout.shelf)return `<article class="price-tag shelf-label shelf-empty empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span></article>`;
   return `<article class="price-tag empty-preview preview-slot${currentLayout.compact?' compact':''}${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
 }
 
@@ -222,7 +240,7 @@ function draftProduct(raw){
 
 function makePaper(items,{preview=false,offset=0,sample=false}={}){
   const l=currentLayout;
-  const paper=document.createElement('div');paper.className='paper';
+  const paper=document.createElement('div');paper.className=l.shelf?'paper shelf-paper':'paper';
   paper.dir=state.language==='en'?'ltr':'rtl';
   Object.assign(paper.style,{width:l.w+'mm',height:l.h+'mm',padding:state.margin+'mm',gap:state.gap+'mm',gridTemplateColumns:`repeat(${l.cols}, ${l.cw}mm)`,gridTemplateRows:`repeat(${l.rows}, ${l.ch}mm)`});
   paper.innerHTML=Array.from({length:state.count},(_,i)=>{
@@ -239,7 +257,7 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
     svg.setAttribute('viewBox',`0 0 ${data.length+2*quiet} ${height}`);svg.setAttribute('preserveAspectRatio','none');
     let bars='';for(let i=0;i<data.length;i++)if(data[i]==='1')bars+=`<rect x="${i+quiet}" y="0" width="1" height="${height}"/>`;
     svg.innerHTML=bars;
-    if(!l.mini&&l.bw/(data.length+2*quiet)<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
+    if(!l.mini&&l.bw/(data.length+2*quiet)<.25)addIssue(tr(l.shelf?'الباركود طويل لبطاقة الشيلف. راجع رمز الصنف قبل الطباعة.':'الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
   return paper;
 }
@@ -355,7 +373,21 @@ function balanceName(name){
   }));
 }
 
+function checkShelfFit(tag){
+  for(const [selector,start,min]of [['.shelf-name',3.45,2.45],['.shelf-unit',2.45,2.05],['.shelf-value',7.9,3.6]]){
+    const field=tag.querySelector(selector);
+    const exceeds=()=>field.scrollWidth>field.clientWidth+1||field.scrollHeight>field.clientHeight+1;
+    let size=start;
+    field.style.fontSize=size+'mm';
+    while(exceeds()&&size>min){size=Math.max(min,size-.2);field.style.fontSize=size+'mm';}
+    if(exceeds())addIssue(tr('تعريف الصنف أو السعر لا يتسع لبطاقة الشيلف. اختصر الاسم أو الوحدة وراجع السعر.'));
+  }
+}
 function checkFit(){
+  if(currentLayout.shelf){
+    for(const tag of $('previewPaper').querySelectorAll('.shelf-label:not(.empty-preview)'))checkShelfFit(tag);
+    return;
+  }
   for(const tag of $('previewPaper').querySelectorAll('.price-tag:not(.empty-preview)')){
     const name=tag.querySelector('.tag-name'),product=tag.querySelector('.tag-product'),body=tag.querySelector('.tag-content-inner'),price=tag.querySelector('.tag-price'),inner=tag.querySelector('.tag-price-inner'),content=tag.querySelector('.tag-content'),l=currentLayout;
     let font=l.nameSize;
@@ -555,9 +587,20 @@ $('sampleToggle').addEventListener('click',()=>{state.sample=!state.sample;drawP
 const labelTemplateButtons=document.querySelectorAll('[data-label-template]');
 labelTemplateButtons.forEach(button=>button.addEventListener('click',()=>{
   if(labelTemplate===button.dataset.labelTemplate)return;
+  const wasShelf=isShelfTemplate();
   labelTemplate=button.dataset.labelTemplate;
   labelTemplateButtons.forEach(other=>{const selected=other===button;other.classList.toggle('selected',selected);other.setAttribute('aria-pressed',String(selected));});
-  $('downloadStatus').textContent='';drawPreview();
+  $('downloadStatus').textContent='';
+  const shelf=isShelfTemplate();
+  if(shelf!==wasShelf){
+    if(shelf){previousLabelLayout=Object.fromEntries(Object.keys(SHELF_PRINT).map(key=>[key,state[key]]));Object.assign(state,SHELF_PRINT);}
+    else {Object.assign(state,previousLabelLayout);previousLabelLayout=null;}
+    for(const id of ['paper','orientation','margin','gap']){$(id).value=state[id];$(id).disabled=shelf;}
+    document.querySelectorAll('[data-count]').forEach(b=>{const active=Number(b.dataset.count)===state.count;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));b.disabled=shelf;});
+    document.querySelectorAll('[data-regular-layout]').forEach(el=>el.hidden=shelf);
+    $('shelfLayoutNote').hidden=!shelf;
+    trimGrid();state.selected=Math.min(state.selected,state.cards.length-1);state.page=Math.floor(state.selected/state.count);loadForm();render();
+  }else drawPreview();
   document.dispatchEvent(new Event('pricing:label-template'));
 }));
 document.querySelectorAll('[data-output-mode]').forEach(button=>button.addEventListener('click',()=>{

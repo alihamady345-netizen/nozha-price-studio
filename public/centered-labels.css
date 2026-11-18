@@ -1,5 +1,7 @@
 /* One physical grid for preview, PDF and print. */
 .paper{position:relative;justify-content:center;align-content:center}
+.label-size-note{font-size:12px;line-height:1.8;color:#5a7163;margin:0 0 14px}
+.invalid-grid-note{align-self:center;text-align:center;font-size:5mm;padding:8mm;color:#93472e}
 .sheet-cut-marks{position:absolute;inset:0;pointer-events:none;z-index:1}
 .sheet-cut-marks i{position:absolute;display:block;background:#666}
 .price-print-preview{width:96vw;max-width:1400px;height:94vh;max-height:94vh;padding:0;border:1px solid #cdd8d1;border-radius:12px;background:#fff;color:var(--ink)}

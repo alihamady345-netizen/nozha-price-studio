@@ -54,7 +54,7 @@ window.PriceImportData=(()=>{
 
 // IMPORT_UI
 (()=>{
-  const sizes={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
+  const sizes=LABEL_PRESETS;
   const L=(ar,en)=>state.language==='en'?en:ar;
   const root=document.createElement('section');root.className='price-import';root.setAttribute('aria-labelledby','priceImportHeading');
   root.innerHTML=`<div class="price-import-heading"><div><span class="price-import-eyebrow">EXCEL → PRINT</span><h2 id="priceImportHeading">من الإكسيل إلى بطاقات الأسعار</h2><p id="priceImportIntro">ارفع الإكسيل، حدد مقاس كل صنف، ثم اطبع الكل.</p></div><label class="price-import-upload"><span id="priceImportUploadLabel">رفع إكسيل الأسعار</span><input id="priceImportFile" type="file" accept=".xlsx,.xls,.csv,.tsv"></label></div><div class="price-import-sheet" hidden><label for="priceImportSheet">ورقة العمل</label><select id="priceImportSheet"></select></div><p id="priceImportStatus" role="status" aria-live="polite">يتعرف على اسم الصنف والوحدة وسعر التجزئة والباركود أو رقم الصنف.</p><div id="priceImportJob" hidden><div class="price-import-bottom"><div><strong id="priceImportSizeLabel">تطبيق مقاس على الأصناف المحددة</strong><span id="priceImportSizeHint">يمكنك اختيار مقاس مختلف أمام كل صنف. المقاسات موزعة على ورق A4 بهوامش طباعة.</span></div><div class="price-import-sizes" role="group" aria-labelledby="priceImportSizeLabel">${Object.entries(sizes).map(([s,[n]])=>`<button type="button" data-price-size="${s}"><b>${s}</b><small>${n} / A4</small></button>`).join('')}</div></div><div class="price-import-table-wrap"><table class="price-import-table"><thead><tr><th><input id="priceImportSelectAll" type="checkbox" aria-label="تحديد جميع الأصناف" checked></th><th>#</th><th>الصنف / الباركود</th><th>السعر</th><th>مقاس البطاقة</th></tr></thead><tbody id="priceImportRows"></tbody></table></div><div id="priceImportGroups" class="price-import-groups"></div><p id="priceImportMiniNote" hidden>A11 وA12: الباركود ورقمه موجودان بحجم مصغّر جدًا؛ قراءة القارئ غير مضمونة. جرّب ورقة أولًا.</p><div class="price-import-actions"><div><strong id="priceImportSummary" role="status"></strong><p id="priceImportReady" role="status"></p></div><div><button type="button" id="priceImportPdf" class="download-button">تنزيل الكل PDF</button><button type="button" id="priceImportPrint" class="print-button">طباعة الكل</button></div></div></div>`;
@@ -137,9 +137,10 @@ window.PriceImportData=(()=>{
     try{
       for(const group of groups()){
         [state.count,state.orientation]=groupLayout(group.size);state.paper='A4';updateLayout();
+        const layoutIssues=lastIssues.slice();
         const items=group.rows.map(r=>state.cards[r.position]);
         for(let i=0;i<items.length;i+=state.count){
-          lastIssues=[];const page=makePaper(items.slice(i,i+state.count));
+          lastIssues=layoutIssues.slice();const page=makePaper(items.slice(i,i+state.count));
           // Freeze each group's physical typography before switching to the next size.
           for(const key of document.documentElement.style)if(key.startsWith('--'))page.style.setProperty(key,document.documentElement.style.getPropertyValue(key));
           page.dataset.labelSize=group.size;page.style.page=state.orientation==='landscape'?'priceLandscape':'pricePortrait';

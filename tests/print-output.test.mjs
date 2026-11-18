@@ -8,9 +8,41 @@ const geometry=vm.createContext({state:{margin:5,gap:2},PAPER:{A3:[297,420],A4:[
 vm.runInContext(app.slice(app.indexOf('function getLayout('),app.indexOf('function updateLayout(')),geometry);
 for(const paper of ['A3','A4','A5','A6'])for(const orientation of ['portrait','landscape'])for(const count of [1,2,4,5,6,8,12,16,20,32,64,128,256])for(const margin of [3,5,15])for(const gap of [0,1,2,5]){
   const l=geometry.getLayout({paper,orientation,count,margin,gap,brand:'karaz'});
+  assert.ok(l.cw>0&&l.ch>0,'Never emit zero or negative CSS dimensions');
+  if(l.invalid)continue;
   assert.ok(Math.abs(l.cw*l.cols+gap*(l.cols-1)+2*margin-l.w)<1e-9);
   assert.ok(Math.abs(l.ch*l.rows+gap*(l.rows-1)+2*margin-l.h)<1e-9);
 }
+assert.equal(geometry.getLayout({paper:'A6',orientation:'portrait',count:256,margin:15,gap:5,brand:'karaz'}).invalid,true);
+vm.runInContext(app.slice(app.indexOf('const LABEL_PRESETS='),app.indexOf('const arabicDigits ='))+'\nglobalThis.presets=LABEL_PRESETS;',geometry);
+for(const [size,[count,orientation]]of Object.entries(geometry.presets)){
+  const l=geometry.getLayout({paper:'A4',orientation,count,margin:5,gap:2,brand:'nozha'});
+  assert.equal(l.invalid,false,size+' preset must fit its A4 sheet');
+  assert.equal(l.cols*l.rows,count);
+}
+
+// Company signs must use the same 210 x 99 mm strips when printed and exported.
+const designs=readFileSync(new URL('../public/designs.js',import.meta.url),'utf8');
+const company=vm.createContext({document:{createElement:()=>({style:{}})},data:{template:'geometry',brand:'nozha',writing:'bold',mono:false,cuts:true},entries:()=>[],esc:x=>x});
+vm.runInContext(designs.slice(designs.indexOf('function sheet('),designs.indexOf('function fit(')),company);
+const companySheet=company.sheet(0);
+assert.equal(companySheet.style.width,'210mm');assert.equal(companySheet.style.height,'297mm');
+company.download=async options=>{assert.equal(options.forPrint,true);};
+vm.runInContext(designs.slice(designs.indexOf('async function print('),designs.indexOf('async function download(')),company);
+await company.print();
+
+const offers=readFileSync(new URL('../public/offers.js',import.meta.url),'utf8');
+const offer=vm.createContext({PAPER:{A4:[210,297]},data:{paper:'A4'}});
+vm.runInContext(offers.slice(offers.indexOf('function automaticCount('),offers.indexOf('function whitePaper(')),offer);
+vm.runInContext(offers.slice(offers.indexOf('function geometry('),offers.indexOf('function groupKey(')),offer);
+for(const size of ['A4','A5','A6','A7','A8','A4_20']){
+ const l=offer.geometry(size);assert.equal(l.cols*l.rows,l.count);assert.ok(Math.abs(l.cw*l.cols-l.w)<1e-9);assert.ok(Math.abs(l.ch*l.rows-l.h)<1e-9);
+}
+const bundleSource=readFileSync(new URL('../public/bundle-offer.js',import.meta.url),'utf8');
+const bundle=vm.createContext({data:{size:'A4'}});
+vm.runInContext(bundleSource.slice(bundleSource.indexOf('const sizes ='),bundleSource.indexOf('const note =')),bundle);
+vm.runInContext(bundleSource.slice(bundleSource.indexOf('function geometry('),bundleSource.indexOf('function logo(')),bundle);
+for(const size of ['A4','A5','A6','A7']){bundle.data.size=size;const l=bundle.geometry();assert.ok(Math.abs(l.cw*l.cols-l.w)<1e-9);assert.ok(Math.abs(l.ch*l.rows-l.h)<1e-9);}
 
 function setup({fail=false,allowed=true}={}){
   const calls=[],buttons=[{disabled:false},{disabled:true}],main={inert:false};

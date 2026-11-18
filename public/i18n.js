@@ -1,6 +1,11 @@
 'use strict';
 
 const englishText=new Map(Object.entries({
+  'تقسيم غير صالح':'Invalid grid',
+  'مقاس البطاقة على ورقة A4':'Label division on A4 paper',
+  'تقسيم مخصص':'Custom layout',
+  'اختيار المقاس يضبط الاتجاه والتقسيم تلقائيًا. الأبعاد المعروضة هي مقاس القص الفعلي بعد الهوامش والفواصل.':'Selecting a size sets the orientation and grid automatically. Displayed dimensions are the actual cut size after margins and gaps.',
+  'الهوامش والفواصل لا تترك مساحة كافية لهذا التقسيم. قللها أو اختر عدد بطاقات أقل.':'Margins and gaps leave too little room for this grid. Reduce them or select fewer labels.',
   'نسخة الطباعة بدون رابط أو تاريخ':'Print copy without URL or date',
   'اختر الحجم الفعلي 100%، وورقة واحدة في كل صفحة. لا تستخدم ملاءمة الصفحة.':'Select actual size (100%) and one sheet per page. Do not use Fit to page.',
   'فتح نافذة الطباعة':'Open print dialog','معاينة ملف الطباعة':'Print file preview',

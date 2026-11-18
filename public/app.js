@@ -2,6 +2,8 @@
 const $ = id => document.getElementById(id);
 const state = { language:new URL(location.href).searchParams.get('lang')==='en'?'en':'ar', brand:'nozha', paper:'A4', orientation:'portrait', count:6, margin:5, gap:2, cutLines:true, outputMode:'color', cards:Array(6).fill(null), drafts:{}, page:0, selected:0, sample:false };
 const PAPER = {A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]};
+// The same A4 label divisions are used for manual entry and Excel imports.
+const LABEL_PRESETS={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
 const arabicDigits = value => String(value).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const latinDigits = value => String(value).replace(/[٠-٩۰-۹]/g,d=>String((d.charCodeAt(0)-0x660)%16));
 const escapeHtml = value => String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -33,8 +35,11 @@ function getLayout(settings=state){
   if(settings.count===128){cols=8;rows=16;}
   if(settings.count===256){cols=16;rows=16;}
   if(settings.count===20){cols=settings.orientation==='landscape'?5:4;rows=settings.orientation==='landscape'?4:5;}
-  const cw=(w-2*settings.margin-(cols-1)*settings.gap)/cols;
-  const ch=(h-2*settings.margin-(rows-1)*settings.gap)/rows;
+  const rawCw=(w-2*settings.margin-(cols-1)*settings.gap)/cols;
+  const rawCh=(h-2*settings.margin-(rows-1)*settings.gap)/rows;
+  const invalid=!Number.isFinite(rawCw)||!Number.isFinite(rawCh)||rawCw<2.8||rawCh<5.5;
+  const cw=Math.max(.1,Number.isFinite(rawCw)?rawCw:.1);
+  const ch=Math.max(.1,Number.isFinite(rawCh)?rawCh:.1);
   const micro=settings.count===32||settings.count===64;
   const compact=ch<47||(cw/ch>2&&ch<65);
   const large=!compact&&ch>=120&&cw>=90;
@@ -54,7 +59,7 @@ function getLayout(settings=state){
   const unitMargin=compact?.2:large?2:.5;
   const contentW=Math.max(1,cw-2*pad-.4);
   const priceShift=Math.min(3,contentW*.02);
-  const layout={w,h,cols,rows,cw,ch,compact,large,pad,bw,unitMargin,nameLineHeight,priceShift,
+  const layout={w,h,cols,rows,cw,ch,invalid,compact,large,pad,bw,unitMargin,nameLineHeight,priceShift,
     logoW,logoH,
     nameSecondaryRatio:large?.74:compact?.86:.82,
     nameSize:compact?clamp(ch*.105,2.8,4.2):large?clamp(Math.min(ch*.09,cw*.14),5,27):clamp(Math.min(ch*.071,cw*.095),3.5,18),
@@ -86,7 +91,7 @@ function getLayout(settings=state){
   const previousFooter=layout.footerH;
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
-  if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:76});
+  if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:76,invalid:false});
   return layout;
 }
 
@@ -111,11 +116,14 @@ function updateLayout(){
     document.documentElement.style.setProperty('--tag-unit-color','#000000');
   }
   $('printSize').textContent=`@page { size: ${l.w}mm ${l.h}mm; margin: 0; }`;
-  $('cardDimensions').textContent=`${l.cw.toFixed(1)} × ${l.ch.toFixed(1)} mm`;
+  $('cardDimensions').textContent=l.invalid?tr('تقسيم غير صالح'):`${l.cw.toFixed(2)} × ${l.ch.toFixed(2)} mm`;
   $('sheetSummary').textContent=state.language==='en'?`${state.paper} · ${state.count} labels / sheet`:`${state.paper} · ${arabicDigits(state.count)} بطاقة / ورقة`;
   const warning=[];
+  if(l.invalid)warning.push(tr('الهوامش والفواصل لا تترك مساحة كافية لهذا التقسيم. قللها أو اختر عدد بطاقات أقل.'));
   if(!l.mini&&(l.ch<22||l.cw<(l.tiny?32:40)))warning.push(tr('هذا التقسيم صغير لعرض الاسم والسعر والباركود بوضوح. اختر ورقًا أكبر أو عدد بطاقات أقل.'));
   lastIssues=warning;
+  const preset=$('labelPreset');
+  if(preset)preset.value=!l.shelf&&state.paper==='A4'?(Object.entries(LABEL_PRESETS).find(([,value])=>value[0]===state.count&&value[1]===state.orientation)?.[0]||''):'';
 }
 
 function logoMarkup(){
@@ -294,6 +302,12 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
   paper.dir=state.language==='en'?'ltr':'rtl';
   Object.assign(paper.style,{width:l.w+'mm',height:l.h+'mm',padding:state.margin+'mm',gap:state.gap+'mm',gridTemplateColumns:`repeat(${l.cols}, ${l.cw}mm)`,gridTemplateRows:`repeat(${l.rows}, ${l.ch}mm)`});
   if(l.shelf){paper.style.columnGap=l.columnGap+'mm';paper.style.rowGap=l.rowGap+'mm';}
+  if(l.invalid){
+    paper.style.gridTemplateColumns='1fr';paper.style.gridTemplateRows='1fr';
+    const note=document.createElement('p');note.className='invalid-grid-note';
+    note.textContent=tr('الهوامش والفواصل لا تترك مساحة كافية لهذا التقسيم. قللها أو اختر عدد بطاقات أقل.');
+    paper.append(note);return paper;
+  }
   paper.innerHTML=Array.from({length:state.count},(_,i)=>{
     const index=offset+i;
     if(preview&&!sample&&hasPendingDraft(index))return tagMarkup(draftProduct(state.drafts[index]),index,{draft:true});
@@ -440,6 +454,7 @@ function checkShelfFit(tag){
   }
 }
 function checkFit(){
+  if(currentLayout.invalid)return;
   if(currentLayout.shelf){
     for(const tag of $('previewPaper').querySelectorAll('.shelf-label:not(.empty-preview)'))checkShelfFit(tag);
     return;
@@ -634,6 +649,13 @@ document.querySelectorAll('[data-count]').forEach(button=>button.addEventListene
   document.querySelectorAll('[data-count]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});loadForm();render();
 }));
 for(const id of ['paper','orientation'])$(id).addEventListener('change',()=>{state[id]=$(id).value;drawPreview();});
+$('labelPreset').addEventListener('change',()=>{
+  const preset=LABEL_PRESETS[$('labelPreset').value];if(!preset)return;
+  [state.count,state.orientation]=preset;state.paper='A4';state.page=0;state.selected=0;state.sample=false;
+  $('paper').value=state.paper;$('orientation').value=state.orientation;
+  document.querySelectorAll('[data-count]').forEach(button=>{const on=Number(button.dataset.count)===state.count;button.classList.toggle('selected',on);button.setAttribute('aria-pressed',String(on));});
+  trimGrid();loadForm();render();
+});
 for(const id of ['margin','gap'])$(id).addEventListener('change',()=>{let value=Number($(id).value);const min=id==='margin'?3:0,max=id==='margin'?15:5;if(!Number.isFinite(value))value=id==='margin'?5:2;state[id]=Math.max(min,Math.min(max,value));$(id).value=state[id];drawPreview();});
 $('cutLines').addEventListener('change',()=>{state.cutLines=$('cutLines').checked;drawPreview();});
 $('prevPage').addEventListener('click',()=>selectSlot((state.page-1)*state.count));
@@ -685,6 +707,7 @@ function preparePrint(){
   const root=$('printRoot');
   if(!filledCount()||pendingDraftIndexes().length||formSaving){root.replaceChildren();return false;}
   updateLayout();
+  if(currentLayout.invalid){root.replaceChildren();showLayoutIssues();return false;}
   const pages=[];
   for(let i=0;i<state.cards.length;i+=state.count){const items=state.cards.slice(i,i+state.count);if(items.some(Boolean))pages.push(makePaper(items));}
   const preview=$('previewPaper'),old=preview.firstChild;

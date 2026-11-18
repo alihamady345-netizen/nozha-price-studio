@@ -468,7 +468,7 @@ function checkFit(){
     name.style.fontSize=font+'mm';balanceName(name);
     // Reserve the font's painted overflow inside the product group before fitting.
     // A short line box on another platform must not trigger a false clipping alert.
-    const reserveProductInk=()=>{if(!l.large&&!l.mini)return;product.style.height='auto';product.style.height=Math.ceil(Math.max(product.scrollHeight,product.offsetHeight))*25.4/96+'mm';};
+    const reserveProductInk=()=>{product.style.height='auto';product.style.height=Math.ceil(Math.max(product.scrollHeight,product.offsetHeight))*25.4/96+'mm';};
     reserveProductInk();
     // Large posters reserve the rendered header and barcode footer first.
     // Measure the actual content box rather than a theoretical font height.
@@ -656,7 +656,17 @@ $('labelPreset').addEventListener('change',()=>{
   document.querySelectorAll('[data-count]').forEach(button=>{const on=Number(button.dataset.count)===state.count;button.classList.toggle('selected',on);button.setAttribute('aria-pressed',String(on));});
   trimGrid();loadForm();render();
 });
-for(const id of ['margin','gap'])$(id).addEventListener('change',()=>{let value=Number($(id).value);const min=id==='margin'?3:0,max=id==='margin'?15:5;if(!Number.isFinite(value))value=id==='margin'?5:2;state[id]=Math.max(min,Math.min(max,value));$(id).value=state[id];drawPreview();});
+for(const id of ['margin','gap']){
+  const updateSpacing=event=>{
+    let value=Number($(id).value);const min=id==='margin'?3:0,max=id==='margin'?15:5;
+    if(event.type==='input'&&(!$(id).value||!Number.isFinite(value)||value<min||value>max))return;
+    if(!Number.isFinite(value))value=id==='margin'?5:2;
+    state[id]=Math.max(min,Math.min(max,value));
+    if(event.type==='change')$(id).value=state[id];
+    drawPreview();
+  };
+  $(id).addEventListener('input',updateSpacing);$(id).addEventListener('change',updateSpacing);
+}
 $('cutLines').addEventListener('change',()=>{state.cutLines=$('cutLines').checked;drawPreview();});
 $('prevPage').addEventListener('click',()=>selectSlot((state.page-1)*state.count));
 $('nextPage').addEventListener('click',()=>selectSlot((state.page+1)*state.count));

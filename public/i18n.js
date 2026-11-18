@@ -1,6 +1,7 @@
 'use strict';
 
 const englishText=new Map(Object.entries({
+  'اختيار المقاس يضبط الاتجاه والتقسيم تلقائيًا. الهوامش والفواصل ٥ مم، وللبطاقات الصغيرة فاصل ٢ مم. الأبعاد المعروضة هي مقاس القص الفعلي.':'Selecting a size sets its orientation and grid. Margins and gutters are 5 mm, with 2 mm gutters for small labels. Displayed dimensions are the actual cut size.',
   'تقسيم غير صالح':'Invalid grid',
   'مقاس البطاقة على ورقة A4':'Label division on A4 paper',
   'تقسيم مخصص':'Custom layout',

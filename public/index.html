@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="studio-v2.css">
   <link rel="stylesheet" href="signature.css">
   <link rel="stylesheet" href="language.css">
-  <link rel="stylesheet" href="centered-labels.css?v=20261118-size-audit">
+  <link rel="stylesheet" href="centered-labels.css?v=20261118-balanced-cuts">
   <link rel="stylesheet" href="catalog.css?v=20261015-library">
   <link rel="stylesheet" href="offers.css">
   <link rel="stylesheet" href="designs.css">
@@ -25,18 +25,18 @@
   <style id="printSize">@page { size: A4 portrait; margin: 0; }</style>
   <script defer src="asset-loader.js?v=20261015-speed"></script>
   <script defer src="assets/JsBarcode.all.min.js"></script>
-  <script defer src="i18n.js?v=20261118-size-audit"></script>
-  <script defer src="app.js?v=20261118-size-audit"></script>
+  <script defer src="i18n.js?v=20261118-balanced-cuts"></script>
+  <script defer src="app.js?v=20261118-balanced-cuts"></script>
   <script defer src="catalog.js?v=20261015-library"></script>
-  <script defer src="export-pdf.js?v=20261118-clean-print"></script>
+  <script defer src="export-pdf.js?v=20261118-balanced-cuts"></script>
   <script defer src="barcode-scanner.js?v=20261016-barcode-fallback"></script>
   <script defer src="offers-xlsx.js?v=20261015-speed"></script>
   <script defer src="offer-validity.js"></script>
-  <script defer src="offers.js?v=20261118-size-audit"></script>
+  <script defer src="offers.js?v=20261118-balanced-cuts"></script>
   <script defer src="offers-library.js?v=20261015-speed"></script>
-  <script defer src="price-import.js?v=20261118-size-audit"></script>
-  <script defer src="designs.js?v=20261118-size-audit"></script>
-  <script defer src="bundle-offer.js?v=20261020-bw"></script>
+  <script defer src="price-import.js?v=20261118-balanced-cuts"></script>
+  <script defer src="designs.js?v=20261118-balanced-cuts"></script>
+  <script defer src="bundle-offer.js?v=20261118-balanced-cuts"></script>
 </head>
 <body>
   <header class="app-header">
@@ -56,7 +56,7 @@
         </div>
         <div class="two-fields" data-regular-layout><label>مقاس الورق<select id="paper"><option>A4</option><option>A3</option><option>A5</option><option>A6</option></select></label><label>اتجاه الورق<select id="orientation"><option value="portrait">عمودي</option><option value="landscape">أفقي</option></select></label></div>
         <label data-regular-layout>مقاس البطاقة على ورقة A4<select id="labelPreset"><option value="">تقسيم مخصص</option><option value="A4">A4 — 1 / A4</option><option value="A5">A5 — 2 / A4</option><option value="A6">A6 — 4 / A4</option><option value="A7">A7 — 8 / A4</option><option value="A8">A8 — 16 / A4</option><option value="A9">A9 — 32 / A4</option><option value="A10">A10 — 64 / A4</option><option value="A11">A11 — 128 / A4</option><option value="A12">A12 — 256 / A4</option></select></label>
-        <p class="label-size-note" data-regular-layout>اختيار المقاس يضبط الاتجاه والتقسيم تلقائيًا. الأبعاد المعروضة هي مقاس القص الفعلي بعد الهوامش والفواصل.</p>
+        <p class="label-size-note" data-regular-layout>اختيار المقاس يضبط الاتجاه والتقسيم تلقائيًا. الهوامش والفواصل ٥ مم، وللبطاقات الصغيرة فاصل ٢ مم. الأبعاد المعروضة هي مقاس القص الفعلي.</p>
         <label class="field-label" id="divisionLabel" data-regular-layout>تقسيم الورقة</label>
         <div class="division-switch" role="group" aria-labelledby="divisionLabel" data-regular-layout>
           <button data-count="1" aria-pressed="false"><i class="layout-icon l1"></i><span>١</span></button>
@@ -84,7 +84,7 @@
         <p id="shelfLayoutNote" class="shelf-layout-note" hidden>A4 عمودي · ١٦ بطاقة · عمودان × ٨ صفوف. الفاصل بين العمودين ٣ مم وبين الصفوف ١ مم. اطبع بالحجم الفعلي 100%.</p>
         <label class="field-label output-mode-label" id="outputModeLabel">ألوان الورقة</label>
         <div class="output-mode-switch" role="group" aria-labelledby="outputModeLabel"><button type="button" data-output-mode="color" class="selected" aria-pressed="true"><span class="color-mode-symbol" aria-hidden="true"></span>ملوّن</button><button type="button" data-output-mode="bw" aria-pressed="false"><span class="mono-mode-symbol" aria-hidden="true"></span>أبيض وأسود</button></div>
-        <details class="print-settings"><summary>هوامش الطباعة وخطوط القص</summary><div class="two-fields" data-regular-layout><label>الهامش (مم)<input id="margin" type="number" min="3" max="15" step="1" value="5"></label><label>الفاصل (مم)<input id="gap" type="number" min="0" max="5" step="0.5" value="2"></label></div><label class="check-field"><input type="checkbox" id="cutLines" checked>إظهار خطوط القص</label></details>
+        <details class="print-settings"><summary>هوامش الطباعة وخطوط القص</summary><div class="two-fields" data-regular-layout><label>الهامش (مم)<input id="margin" type="number" min="3" max="15" step="1" value="5"></label><label>الفاصل (مم)<input id="gap" type="number" min="0" max="5" step="0.5" value="5"></label></div><label class="check-field"><input type="checkbox" id="cutLines" checked>إظهار خطوط القص</label></details>
       </section>
       <section class="control-section">
         <div class="section-heading"><span>٠٢</span><h2 id="formHeading">بيانات البطاقة ١</h2></div>

@@ -1,9 +1,10 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const state = { language:new URL(location.href).searchParams.get('lang')==='en'?'en':'ar', brand:'nozha', paper:'A4', orientation:'portrait', count:6, margin:5, gap:2, cutLines:true, outputMode:'color', cards:Array(6).fill(null), drafts:{}, page:0, selected:0, sample:false };
+const state = { language:new URL(location.href).searchParams.get('lang')==='en'?'en':'ar', brand:'nozha', paper:'A4', orientation:'portrait', count:6, margin:5, gap:5, cutLines:true, outputMode:'color', cards:Array(6).fill(null), drafts:{}, page:0, selected:0, sample:false };
 const PAPER = {A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]};
 // The same A4 label divisions are used for manual entry and Excel imports.
 const LABEL_PRESETS={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
+const presetSpacing=count=>({margin:5,gap:count<32?5:2});
 const arabicDigits = value => String(value).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const latinDigits = value => String(value).replace(/[٠-٩۰-۹]/g,d=>String((d.charCodeAt(0)-0x660)%16));
 const escapeHtml = value => String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -645,14 +646,15 @@ document.querySelectorAll('[data-brand]').forEach(button=>button.addEventListene
   state.brand=button.dataset.brand;document.querySelectorAll('[data-brand]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});drawPreview();
 }));
 document.querySelectorAll('[data-count]').forEach(button=>button.addEventListener('click',()=>{
-  state.count=Number(button.dataset.count);if(state.count>=32){state.orientation=state.count===64?'landscape':'portrait';$('orientation').value=state.orientation;}trimGrid();state.page=0;state.selected=0;state.sample=false;
+  state.count=Number(button.dataset.count);Object.assign(state,presetSpacing(state.count));$('margin').value=state.margin;$('gap').value=state.gap;if(state.count>=32){state.orientation=state.count===64?'landscape':'portrait';$('orientation').value=state.orientation;}trimGrid();state.page=0;state.selected=0;state.sample=false;
   document.querySelectorAll('[data-count]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});loadForm();render();
 }));
 for(const id of ['paper','orientation'])$(id).addEventListener('change',()=>{state[id]=$(id).value;drawPreview();});
 $('labelPreset').addEventListener('change',()=>{
   const preset=LABEL_PRESETS[$('labelPreset').value];if(!preset)return;
   [state.count,state.orientation]=preset;state.paper='A4';state.page=0;state.selected=0;state.sample=false;
-  $('paper').value=state.paper;$('orientation').value=state.orientation;
+  Object.assign(state,presetSpacing(state.count));
+  for(const id of ['paper','orientation','margin','gap'])$(id).value=state[id];
   document.querySelectorAll('[data-count]').forEach(button=>{const on=Number(button.dataset.count)===state.count;button.classList.toggle('selected',on);button.setAttribute('aria-pressed',String(on));});
   trimGrid();loadForm();render();
 });

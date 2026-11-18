@@ -67,7 +67,7 @@ async function downloadPricePdf({print=false}={}){
     await Promise.all(images.map(async image=>{const attribute=image.tagName.toLowerCase()==='img'?'src':'href',href=image.getAttribute(attribute);if(href&&!href.startsWith('data:'))image.setAttribute(attribute,await pdfAssetDataUrl(href));}));
     const orientation=width>height?'landscape':'portrait';
     const pdf=new Pdf({unit:'mm',format:[width,height],orientation,compress:true});
-    pdf.setProperties({title:(state.language==='en'?'Price labels - ':'بطاقات أسعار ')+(state.brand==='nozha'?tr('نزهة'):tr('كرز')),subject:mono?tr('أبيض وأسود'):tr('ملوّن'),creator:tr('بطاقات أسعار الفروع')});
+    pdf.viewerPreferences?.({PrintScaling:'None',PickTrayByPDFSize:true});pdf.setProperties({title:(state.language==='en'?'Price labels - ':'بطاقات أسعار ')+(state.brand==='nozha'?tr('نزهة'):tr('كرز')),subject:mono?tr('أبيض وأسود'):tr('ملوّن'),creator:tr('بطاقات أسعار الفروع')});
     const scale=300/96;
     for(let i=0;i<pages.length;i++){
       status.textContent=state.language==='en'?`Preparing sheet ${i+1} of ${pages.length}…`:`تجهيز الورقة ${arabicDigits(i+1)} من ${arabicDigits(pages.length)}…`;

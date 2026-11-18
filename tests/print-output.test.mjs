@@ -15,11 +15,15 @@ for(const paper of ['A3','A4','A5','A6'])for(const orientation of ['portrait','l
 }
 assert.equal(geometry.getLayout({paper:'A6',orientation:'portrait',count:256,margin:15,gap:5,brand:'karaz'}).invalid,true);
 vm.runInContext(app.slice(app.indexOf('const LABEL_PRESETS='),app.indexOf('const arabicDigits ='))+'\nglobalThis.presets=LABEL_PRESETS;',geometry);
+geometry.spacing=vm.runInContext('presetSpacing',geometry);
 for(const [size,[count,orientation]]of Object.entries(geometry.presets)){
-  const l=geometry.getLayout({paper:'A4',orientation,count,margin:5,gap:2,brand:'nozha'});
+  const l=geometry.getLayout({paper:'A4',orientation,count,...geometry.spacing(count),brand:'nozha'});
   assert.equal(l.invalid,false,size+' preset must fit its A4 sheet');
   assert.equal(l.cols*l.rows,count);
 }
+const twoUp=geometry.getLayout({paper:'A4',orientation:'landscape',count:2,...geometry.spacing(2),brand:'karaz'});
+assert.equal(twoUp.cw,141);assert.equal(twoUp.ch,200);
+assert.equal(twoUp.w-2*twoUp.cw,15,'Two outer margins and the cutting gutter each occupy 5 mm');
 
 // Company signs must use the same 210 x 99 mm strips when printed and exported.
 const designs=readFileSync(new URL('../public/designs.js',import.meta.url),'utf8');

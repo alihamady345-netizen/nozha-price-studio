@@ -101,7 +101,8 @@ window.PriceImportData=(()=>{
   function previewSize(size){
     if(isShelfTemplate())return;
     [state.count,state.orientation]=sizes[size];state.paper='A4';state.page=0;state.selected=0;state.sample=false;
-    $('paper').value=state.paper;$('orientation').value=state.orientation;
+    Object.assign(state,presetSpacing(state.count));
+    for(const id of ['paper','orientation','margin','gap'])$(id).value=state[id];
     document.querySelectorAll('[data-count]').forEach(b=>{const on=Number(b.dataset.count)===state.count;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
     trimGrid();loadForm();render();
     $('previewSubtitle').textContent=L(`معاينة تقسيم ${size}؛ طباعة الكل تعتمد المقاس المحدد أمام كل صنف في جدول الإكسيل.`,`Preview of the ${size} layout; Print all uses each product’s size from the Excel table.`);
@@ -133,10 +134,12 @@ window.PriceImportData=(()=>{
   new MutationObserver(()=>{if(imported){jobIssues=[];update({table:true});}}).observe($('copiesSummary'),{childList:true});
   function prepareImportedPrint(){
     if(message()||formSaving||pendingDraftIndexes().length){syncButtons();return false;}
-    const original={paper:state.paper,count:state.count,orientation:state.orientation},preview=$('previewPaper'),old=preview.firstChild,oldIssues=lastIssues.slice(),pages=[],errors=[];
+    const original={paper:state.paper,count:state.count,orientation:state.orientation,margin:state.margin,gap:state.gap},preview=$('previewPaper'),old=preview.firstChild,oldIssues=lastIssues.slice(),pages=[],errors=[];
     try{
       for(const group of groups()){
-        [state.count,state.orientation]=groupLayout(group.size);state.paper='A4';updateLayout();
+        [state.count,state.orientation]=groupLayout(group.size);state.paper='A4';
+        if(!isShelfTemplate())Object.assign(state,presetSpacing(state.count));
+        updateLayout();
         const layoutIssues=lastIssues.slice();
         const items=group.rows.map(r=>state.cards[r.position]);
         for(let i=0;i<items.length;i+=state.count){

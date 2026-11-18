@@ -74,11 +74,18 @@ async function downloadPricePdf({print=false}={}){
       // Render one page at a time to limit memory on branch managers' phones.
       const page=pages[i],width=parseFloat(page.style.width),height=parseFloat(page.style.height);
       root.replaceChildren(page);page.style.display='grid';page.classList.add('pdf-render-page');
-      // SVG rasterization needs explicit pixel dimensions, otherwise barcodes
-      // can use the SVG's default intrinsic width and shift or clip in the PDF.
+      // Isolate SVG geometry from inherited RTL/CSS when rasterizing barcodes.
       for(const barcode of page.querySelectorAll('svg.tag-barcode')){
         const box=barcode.getBoundingClientRect();
-        barcode.setAttribute('width',box.width);barcode.setAttribute('height',box.height);
+        const vector=barcode.cloneNode(true),image=document.createElement('img');
+        vector.setAttribute('xmlns','http://www.w3.org/2000/svg');
+        vector.setAttribute('width',box.width);vector.setAttribute('height',box.height);
+        vector.setAttribute('fill','#000');vector.setAttribute('stroke','none');
+        vector.removeAttribute('class');
+        image.className='tag-barcode';image.alt=barcode.getAttribute('aria-label')||'';
+        image.width=Math.round(box.width);image.height=Math.round(box.height);
+        image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(vector));
+        barcode.replaceWith(image);await image.decode();
       }
       const canvas=await window.html2canvas(page,{scale,backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,ignoreElements:element=>element.parentElement===document.body&&element!==root,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,Math.ceil(width*96/25.4)),windowHeight:Math.max(document.documentElement.clientHeight,Math.ceil(height*96/25.4)),onclone(clone){const exportRoot=clone.getElementById('printRoot');if(exportRoot){exportRoot.style.display='block';exportRoot.style.zIndex='0';}clone.body.classList.remove('exporting');}});
       if(!canvas.width||!canvas.height)throw new Error(tr('تعذر تجهيز صورة الورقة.'));

@@ -14,7 +14,7 @@ for(const paper of ['A3','A4','A5','A6'])for(const orientation of ['portrait','l
 
 function setup({fail=false,allowed=true}={}){
   const calls=[],buttons=[{disabled:false},{disabled:true}],main={inert:false};
-  const pages=[{style:{width:'297mm',height:'210mm'},classList:{add(){}}},{style:{width:'210mm',height:'297mm'},classList:{add(){}}}];
+  const pages=[{style:{width:'297mm',height:'210mm'},classList:{add(){}},querySelectorAll:()=>[]},{style:{width:'210mm',height:'297mm'},classList:{add(){}},querySelectorAll:()=>[]}];
   const root={children:pages.slice(),style:{},getAttribute:()=>null,removeAttribute(){},replaceChildren(...next){this.children=next;},querySelectorAll:()=>[]};
   const status={textContent:''};
   const flags=new Set();

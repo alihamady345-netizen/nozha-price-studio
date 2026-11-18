@@ -20,7 +20,25 @@ function grayscaleCanvas(canvas){
 }
 
 let pricePdfBusy=false;
-async function downloadPricePdf(){
+let pricePrintPreview;
+function showPricePrintPreview(blob,filename,pages){
+  pricePrintPreview?.close();
+  const url=URL.createObjectURL(blob),dialog=document.createElement('dialog');
+  dialog.className='price-print-preview';dialog.setAttribute('aria-labelledby','pricePrintTitle');
+  dialog.innerHTML=`<div class="price-print-toolbar"><div><h2 id="pricePrintTitle">${tr('نسخة الطباعة بدون رابط أو تاريخ')}</h2><p class="price-print-size"></p><p>${tr('اختر الحجم الفعلي 100%، وورقة واحدة في كل صفحة. لا تستخدم ملاءمة الصفحة.')}</p></div><div class="output-actions"><button type="button" class="print-button" data-pdf-print>${tr('فتح نافذة الطباعة')}</button><a class="download-button" data-pdf-download>${tr('تنزيل PDF')}</a><button type="button" class="secondary" data-pdf-close>${tr('إغلاق')}</button></div></div><iframe title="${tr('معاينة ملف الطباعة')}" class="price-print-document"></iframe>`;
+  dialog.querySelector('.price-print-size').textContent=pages.map(page=>`${parseFloat(page.style.width)} × ${parseFloat(page.style.height)} mm`).filter((size,i,all)=>all.indexOf(size)===i).join(' · ');
+  const download=dialog.querySelector('[data-pdf-download]'),frame=dialog.querySelector('iframe');
+  download.href=url;download.download=filename;
+  const print=()=>{try{frame.contentWindow.focus();frame.contentWindow.print();}catch{toast(tr('اطبع من شريط ملف PDF أو نزّل الملف واطبعه بالحجم الفعلي.'));}};
+  dialog.querySelector('[data-pdf-print]').addEventListener('click',print);
+  dialog.querySelector('[data-pdf-close]').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',()=>{frame.src='about:blank';dialog.remove();URL.revokeObjectURL(url);if(pricePrintPreview===dialog)pricePrintPreview=null;},{once:true});
+  document.body.append(dialog);pricePrintPreview=dialog;
+  frame.addEventListener('load',print,{once:true});frame.src=url;
+  dialog.showModal();
+}
+
+async function downloadPricePdf({print=false}={}){
   if(pricePdfBusy||document.body.classList.contains('exporting'))return;
   pricePdfBusy=true;
   const status=$('downloadStatus'),root=$('printRoot'),main=document.querySelector('.workspace');
@@ -63,11 +81,16 @@ async function downloadPricePdf(){
       pdf.addImage(canvas.toDataURL('image/jpeg',.98),'JPEG',0,0,width,height,undefined,'FAST');
       canvas.width=1;canvas.height=1;
     }
-    await pdf.save(filename,{returnPromise:true});
-    status.textContent=tr('تم تجهيز ملف PDF وإرساله إلى التنزيلات.');
-    toast(tr('تم تنزيل ملف PDF'));
+    if(print){
+      showPricePrintPreview(pdf.output('blob'),filename,pages);
+      status.textContent=tr('تم تجهيز نسخة الطباعة بدون رابط أو تاريخ.');
+    }else{
+      await pdf.save(filename,{returnPromise:true});
+      status.textContent=tr('تم تجهيز ملف PDF وإرساله إلى التنزيلات.');
+      toast(tr('تم تنزيل ملف PDF'));
+    }
   }catch(error){
-    status.textContent=(error.message||tr('تعذر تجهيز التنزيل.'))+' '+tr('يمكنك استخدام «طباعة الآن» واختيار حفظ PDF.');
+    status.textContent=error.message||tr('تعذر تجهيز التنزيل.');
   }finally{
     pricePdfBusy=false;
     if(originalRootStyle!==undefined){if(originalRootStyle===null)root.removeAttribute('style');else root.setAttribute('style',originalRootStyle);}

@@ -268,6 +268,26 @@ function appendShelfCutMarks(paper,l){
   marks.innerHTML=segments.join('');paper.append(marks);
 }
 
+function appendSheetCutMarks(paper,l){
+  const marks=document.createElement('div'),segments=[];
+  marks.className='sheet-cut-marks';marks.setAttribute('aria-hidden','true');
+  const line=(x,y,w,h)=>segments.push(`<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${h}mm"></i>`);
+  const margin=state.margin,gap=state.gap,thickness=.15,length=Math.min(2,margin-.8);
+  const edges=(count,size)=>Array.from({length:count},(_,i)=>[margin+i*(size+gap),margin+i*(size+gap)+size]).flat();
+  // Marks lie outside the labels, leaving their printed dimensions unchanged.
+  for(const x of new Set(edges(l.cols,l.cw))){
+    line(x-thickness/2,margin-.5-length,thickness,length);
+    line(x-thickness/2,l.h-margin+.5,thickness,length);
+    if(gap>=.6)for(let row=1;row<l.rows;row++)line(x-thickness/2,margin+row*(l.ch+gap)-gap+.2,thickness,gap-.4);
+  }
+  for(const y of new Set(edges(l.rows,l.ch))){
+    line(margin-.5-length,y-thickness/2,length,thickness);
+    line(l.w-margin+.5,y-thickness/2,length,thickness);
+    if(gap>=.6)for(let col=1;col<l.cols;col++)line(margin+col*(l.cw+gap)-gap+.2,y-thickness/2,gap-.4,thickness);
+  }
+  marks.innerHTML=segments.join('');paper.append(marks);
+}
+
 function makePaper(items,{preview=false,offset=0,sample=false}={}){
   const l=currentLayout;
   const paper=document.createElement('div');paper.className=l.shelf?'paper shelf-paper':'paper';
@@ -293,6 +313,7 @@ function makePaper(items,{preview=false,offset=0,sample=false}={}){
     else if(!l.mini&&l.bw/modules<.25)addIssue(tr('الباركود طويل لهذا المقاس. اختر تقسيمًا أقل أو ورقًا أكبر للحفاظ على وضوح الخطوط.'));
   });
   if(l.shelf&&state.cutLines)appendShelfCutMarks(paper,l);
+  if(!l.shelf&&state.cutLines)appendSheetCutMarks(paper,l);
   return paper;
 }
 
@@ -674,7 +695,7 @@ function preparePrint(){
   return printPrepared;
 }
 async function printNow(){
-  try{await document.fonts.ready;if(!preparePrint()){toast(lastIssues[0]||tr('احفظ بيانات البطاقات قبل الطباعة'));return;}window.print();}
+  try{await downloadPricePdf({print:true});}
   catch(error){toast(error.message||tr('تعذر تجهيز الطباعة. أعد المحاولة.'));}
 }
 $('printTop').addEventListener('click',printNow);

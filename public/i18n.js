@@ -1,6 +1,13 @@
 'use strict';
 
 const englishText=new Map(Object.entries({
+  'نسخة الطباعة بدون رابط أو تاريخ':'Print copy without URL or date',
+  'اختر الحجم الفعلي 100%، وورقة واحدة في كل صفحة. لا تستخدم ملاءمة الصفحة.':'Select actual size (100%) and one sheet per page. Do not use Fit to page.',
+  'فتح نافذة الطباعة':'Open print dialog','معاينة ملف الطباعة':'Print file preview',
+  'إغلاق':'Close',
+  'اطبع من شريط ملف PDF أو نزّل الملف واطبعه بالحجم الفعلي.':'Print using the PDF toolbar, or download the file and print at actual size.',
+  'تم تجهيز نسخة الطباعة بدون رابط أو تاريخ.':'The print copy is ready without URL or date.',
+  'زر الطباعة يجهّز نسخة بدون رابط أو تاريخ. اختر نفس مقاس الورق والحجم الفعلي 100%، وورقة واحدة في كل صفحة.':'The Print button prepares a copy without URL or date. Select the matching paper size, actual size (100%), and one sheet per page.',
   'يمكن طباعة صنف واحد؛ الخانات غير المعبأة تظل فارغة.':'You can print one product; unfilled label positions stay blank.',
   'استوديو بطاقات الأسعار | نزهة وكرز':'Price Label Studio | Nozha & Karaz',
   'قالب موحد لبطاقات أسعار نزهة وكرز. اختر الورق والتقسيم، أدخل الأصناف ثم اطبع بالمقاس الفعلي.':'Unified price labels for Nozha and Karaz. Choose a paper size and layout, enter products, then print at actual size.',

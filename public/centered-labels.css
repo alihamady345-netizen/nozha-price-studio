@@ -1,4 +1,17 @@
 /* One physical grid for preview, PDF and print. */
+.paper{position:relative;justify-content:center;align-content:center}
+.sheet-cut-marks{position:absolute;inset:0;pointer-events:none;z-index:1}
+.sheet-cut-marks i{position:absolute;display:block;background:#666}
+.price-print-preview{width:96vw;max-width:1400px;height:94vh;max-height:94vh;padding:0;border:1px solid #cdd8d1;border-radius:12px;background:#fff;color:var(--ink)}
+.price-print-preview::backdrop{background:#142821b3}
+.price-print-preview[open]{display:flex;flex-direction:column}
+.price-print-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 20px;border-bottom:1px solid #d5ddd8}
+.price-print-toolbar p{font-size:13px;color:#52675a;margin-top:3px}
+.price-print-size{direction:ltr;text-align:start;font-family:Arial,sans-serif}
+.price-print-toolbar .download-button{text-decoration:none}
+.price-print-toolbar .output-actions{flex-wrap:wrap}
+.price-print-document{display:block;width:100%;flex:1;min-height:0;border:0;background:#525659}
+@media print{.price-print-preview{display:none!important}}
 html[lang] .price-tag,html[lang] .price-tag.compact{display:block;position:relative;width:var(--tag-w);height:var(--tag-h);border:.2mm solid #aeb8b0;box-shadow:none;border-radius:0;padding:var(--tag-pad);overflow:hidden;background:#fff}
 html[lang] .price-tag.no-cut{border-color:transparent}
 html[lang] .price-tag::before,html[lang] .price-tag::after{content:'';display:block;position:absolute;border:0;border-radius:0;pointer-events:none}

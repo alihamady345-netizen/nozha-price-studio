@@ -61,6 +61,12 @@ window.PriceImportData=(()=>{
   document.querySelector('.workspace .main-surface').prepend(root);
   const status=$('priceImportStatus'),input=$('priceImportFile'),sheetSelect=$('priceImportSheet');
   let workbook=null,filename='',busy=false,imported=false,rows=[],jobIssues=[];
+  function reset(){
+    workbook=null;filename='';imported=false;rows=[];jobIssues=[];
+    input.value='';sheetSelect.replaceChildren();sheetSelect.parentElement.hidden=true;
+    status.textContent=L('يتعرف على اسم الصنف والوحدة وسعر التجزئة والباركود أو رقم الصنف.','Recognizes product name, unit, retail price and barcode or product code.');status.classList.remove('is-error');
+    update({table:true});
+  }
   const active=()=>(imported||busy)&&!window.offerStudio?.active&&!window.designStudio?.active&&!window.bundleStudio?.active;
   const selected=()=>rows.filter(r=>r.selected&&state.cards[r.position]);
   const groupLayout=size=>size==='shelf'?[SHELF_PRINT.count,SHELF_PRINT.orientation]:sizes[size];
@@ -87,7 +93,7 @@ window.PriceImportData=(()=>{
     $('priceImportIntro').textContent=isShelfTemplate()
       ?L('ارفع الإكسيل، حدد الأصناف، واطبع بطاقات الشيلف بالمقاس الثابت.','Upload Excel, select the products, and print at the fixed shelf label size.')
       :L('ارفع الإكسيل، حدد مقاس كل صنف، ثم اطبع الكل.','Upload Excel, set each product’s size, then print all.');
-    if(imported){const known=new Set(rows.map(r=>r.position));state.cards.forEach((p,position)=>{if(p&&!known.has(position))rows.push({position,selected:true,size:''});});}
+    if(imported){rows=rows.filter(r=>state.cards[r.position]);const known=new Set(rows.map(r=>r.position));state.cards.forEach((p,position)=>{if(p&&!known.has(position))rows.push({position,selected:true,size:''});});}
     input.disabled=busy;sheetSelect.disabled=busy;$('priceImportJob').hidden=!imported;
     root.querySelectorAll('[data-price-size]').forEach(b=>b.disabled=busy);
     if(table)renderRows();
@@ -156,7 +162,7 @@ window.PriceImportData=(()=>{
     $('printSize').textContent='@page pricePortrait { size: 210mm 297mm; margin: 0; } @page priceLandscape { size: 297mm 210mm; margin: 0; }';
     printPrepared=pages.length>0&&!jobIssues.length;syncButtons();return printPrepared;
   }
-  window.priceImport={get active(){return active();},get blocksPrint(){return busy||imported&&!!message();},get message(){return message();},syncButtons,preparePrint:prepareImportedPrint};
+  window.priceImport={reset,get active(){return active();},get blocksPrint(){return busy||imported&&!!message();},get message(){return message();},syncButtons,preparePrint:prepareImportedPrint};
   // Allow browser assistants to use the same validated import flow as file uploads.
   if(document.modelContext?.registerTool)document.modelContext.registerTool({
     name:'import_fixed_price_rows',title:'استيراد جدول الأسعار الموحدة',

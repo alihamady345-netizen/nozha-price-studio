@@ -595,7 +595,7 @@ function selectSlot(index,{scroll=false,focus=false}={}){
   if(scroll)$('productForm').scrollIntoView({behavior:'smooth',block:'center'});
   if(focus)$('productName').focus();
 }
-function removeCard(index){state.cards[index]=null;delete state.drafts[index];if(state.selected===index)loadForm();render();toast(tr('تم إفراغ البطاقة مع بقاء أماكن بقية الأصناف'));}
+function removeCard(index){state.cards[index]=null;delete state.drafts[index];if(!state.cards.some(Boolean))window.priceImport?.reset();if(state.selected===index)loadForm();render();toast(tr('تم إفراغ البطاقة مع بقاء أماكن بقية الأصناف'));}
 function saveCurrentCard(raw,position=state.selected){
   const product=validateProduct(raw),next=state.cards.slice(),positions=[position];
   let index=position+1;
@@ -641,7 +641,7 @@ $('slotPicker').addEventListener('click',event=>{const button=event.target.close
 $('previewPaper').addEventListener('click',event=>{const tag=event.target.closest('[data-slot]');if(tag)selectSlot(Number(tag.dataset.slot),{scroll:window.innerWidth<760,focus:true});});
 $('previewPaper').addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;const tag=event.target.closest('[data-slot]');if(tag){event.preventDefault();selectSlot(Number(tag.dataset.slot),{scroll:window.innerWidth<760,focus:true});}});
 $('productList').addEventListener('click',event=>{const edit=event.target.closest('[data-edit]'),del=event.target.closest('[data-delete]');if(edit)selectSlot(Number(edit.dataset.edit),{scroll:true,focus:true});if(del)removeCard(Number(del.dataset.delete));});
-$('clearAll').addEventListener('click',()=>{if(confirm(tr('هل تريد مسح جميع بطاقات الطباعة؟'))){state.cards=Array(state.count).fill(null);state.drafts={};state.page=0;state.selected=0;state.sample=false;loadForm();render();}});
+$('clearAll').addEventListener('click',()=>{if(confirm(tr('هل تريد مسح جميع بطاقات الطباعة؟'))){state.cards=Array(state.count).fill(null);state.drafts={};state.page=0;state.selected=0;state.sample=false;window.priceImport?.reset();loadForm();render();}});
 document.querySelectorAll('[data-brand]').forEach(button=>button.addEventListener('click',()=>{
   state.brand=button.dataset.brand;document.querySelectorAll('[data-brand]').forEach(b=>{const active=b===button;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});drawPreview();
 }));

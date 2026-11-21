@@ -217,7 +217,7 @@ function priceMarkup(price){
 
 function promotionHeaderMarkup(){
   const wholesale=labelTemplate==='wholesale';
-  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?`<span>${tr('البيع')}</span><strong>${tr('بسعر الجملة')}</strong>`:`<strong>${tr('عرض خاص')}</strong>`}</div>`;
+  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?`<strong>${tr('البيع بسعر الجملة')}</strong>`:`<strong>${tr('عرض خاص')}</strong>`}</div>`;
 }
 
 function promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample}){

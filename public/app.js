@@ -194,19 +194,21 @@ function promiseMarkup(){
 }
 function riyalMarkup(white=false){return `<img class="riyal-symbol" src="assets/saudi-riyal${white?'-white':''}.svg" width="512" height="572" alt="${state.language==='en'?'Saudi riyal':'ريال سعودي'}">`;}
 
-function labelCheckMarkup(){
+function labelCheckMarkup(inline=false){
   if(labelTemplate!=='check')return '';
-  const {cw,ch,compact,headerH,mini}=currentLayout;
-  const size=compact
+  const {cw,ch,compact,headerH,mini,micro}=currentLayout;
+  if((micro||mini)&&!inline)return '';
+  const size=inline?Math.min(2,cw*.08,ch*.1):compact
     ?Math.min(4,cw*.14,ch*.12)
     :Math.min(14,cw*.13,ch*.13,headerH*.72);
   const color=state.outputMode==='bw'?'#111111':'#245436';
   const icon=`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="${color}">${mini?'':'<circle cx="12" cy="12" r="10" stroke-width="1.5"/>'}<path d="m6.5 12 3.6 3.6 7.4-7.6" stroke-width="${mini?3.1:2.5}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  return `<img class="tag-check-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(icon)}" alt="" aria-hidden="true">`;
+  return `<img class="${inline?'price-inline-check':'tag-check-mark'}" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(icon)}" alt="" aria-hidden="true">`;
 }
 
 function priceMarkup(price){
   const amount=`<span class="tag-price-inner">${price}</span>`;
+  if(labelTemplate==='check'&&(currentLayout.micro||currentLayout.mini))return `<div class="tag-price inline-check-price">${labelCheckMarkup(true)}<span class="price-frame-amount">${amount}</span></div>`;
   if(labelTemplate!=='price-frame')return `<div class="tag-price">${amount}</div>`;
   const {cw,ch}=currentLayout;
   const size=Math.min(24,cw*.145,ch*.21);

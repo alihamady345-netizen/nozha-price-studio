@@ -168,3 +168,8 @@ html[lang] .price-tag .tag-price.price-frame::after{display:none}
 html[lang] .price-tag .price-frame .tag-price-inner{left:0}
 html[lang] .price-tag.mini-label .tag-price.price-frame{--frame-inset:.18mm}
 html[lang] .price-tag.mini-label .tag-price.price-frame .riyal-symbol{margin:0 .05em 0 0}
+/* Small checks sit beside the amount instead of taking a full content band. */
+html[lang] .price-tag .tag-price.inline-check-price{display:flex;align-items:center;gap:.3mm}
+.price-inline-check{display:block;flex:none}
+html[lang] .inline-check-price .tag-price-inner{left:0;padding:.1em .1mm}
+html[lang] .price-tag.mini-label .draft-marker{font-size:.7mm;max-width:calc(100% - 2mm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;right:1mm;left:auto}

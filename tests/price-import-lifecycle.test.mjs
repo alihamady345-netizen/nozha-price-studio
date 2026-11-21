@@ -18,7 +18,7 @@ const state={language:'ar',count:2,cards:[],drafts:{},selected:0};
 let importedTool,observer;
 const context=vm.createContext({
   state,window:{},LABEL_PRESETS:{A4:[1,'portrait'],A5:[2,'landscape']},
-  $:element,tr:x=>x,formSaving:false,pendingDraftIndexes:()=>[],isShelfTemplate:()=>false,
+  $:element,tr:x=>x,formSaving:false,pendingDraftIndexes:()=>[],isPromotionTemplate:()=>false,isShelfTemplate:()=>false,
   printNow(){},downloadPricePdf(){},loadForm(){},render(){},trimGrid(){},toast(){},confirm:()=>true,
   presetSpacing:()=>({margin:5,gap:5}),
   validateProduct:x=>x,replaceProducts:products=>{state.cards=products;},escapeHtml:x=>x,productText:p=>p.name,
@@ -50,4 +50,12 @@ assert.equal(context.window.priceImport.active,false);
 start();context.removeCard(0);observer();context.removeCard(1);
 assert.equal(context.window.priceImport.active,false);
 assert.equal(element('priceImportRows').innerHTML,'');
+// Posters use one A4 sheet per product, regardless of old per-row size choices.
+context.isPromotionTemplate=()=>true;
+const promotion=importedTool.execute({rows:[]});
+assert.equal(promotion.needsSizes,0);
+assert.equal(context.window.priceImport.blocksPrint,false);
+assert.match(element('priceImportSummary').textContent,/2 بطاقة محددة · 2 ورقة طباعة/);
+assert.match(element('priceImportRows').innerHTML,/A4 · 1 \/ 1/);
+assert.equal(element('root-child').hidden,true);
 console.log('Cleared imports and removed slots cannot transfer stale sizes to later manual cards.');

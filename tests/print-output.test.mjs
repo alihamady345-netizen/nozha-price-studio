@@ -4,7 +4,7 @@ import vm from 'node:vm';
 
 const app=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
 const pdfSource=readFileSync(new URL('../public/export-pdf.js',import.meta.url),'utf8');
-const geometry=vm.createContext({state:{margin:5,gap:2},PAPER:{A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]},isShelfTemplate:()=>false});
+const geometry=vm.createContext({state:{margin:5,gap:2},PAPER:{A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]},isPromotionTemplate:()=>false,isShelfTemplate:()=>false});
 vm.runInContext(app.slice(app.indexOf('function getLayout('),app.indexOf('function updateLayout(')),geometry);
 for(const paper of ['A3','A4','A5','A6'])for(const orientation of ['portrait','landscape'])for(const count of [1,2,4,5,6,8,12,16,20,32,64,128,256])for(const margin of [3,5,15])for(const gap of [0,1,2,5]){
   const l=geometry.getLayout({paper,orientation,count,margin,gap,brand:'karaz'});
@@ -24,6 +24,15 @@ for(const [size,[count,orientation]]of Object.entries(geometry.presets)){
 const twoUp=geometry.getLayout({paper:'A4',orientation:'landscape',count:2,...geometry.spacing(2),brand:'karaz'});
 assert.equal(twoUp.cw,141);assert.equal(twoUp.ch,200);
 assert.equal(twoUp.w-2*twoUp.cw,15,'Two outer margins and the cutting gutter each occupy 5 mm');
+geometry.isPromotionTemplate=()=>true;
+for(const brand of ['nozha','karaz']){
+  const l=geometry.getLayout({paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,brand});
+  assert.equal(l.cw,200);assert.equal(l.ch,287);
+  assert.equal(l.promotion,true);assert.equal(l.priceSize,70);
+  assert.ok(l.contentW<l.cw-2*l.pad);
+  assert.ok(l.headerH+l.contentH+l.footerH+2*l.pad<=l.ch);
+}
+geometry.isPromotionTemplate=()=>false;
 
 // Company signs must use the same 210 x 99 mm strips when printed and exported.
 const designs=readFileSync(new URL('../public/designs.js',import.meta.url),'utf8');
@@ -66,7 +75,7 @@ function setup({fail=false,allowed=true}={}){
     $:id=>id==='printRoot'?root:id==='downloadStatus'?status:{addEventListener(){}},
     document:{body:{classList:{contains:x=>flags.has(x),add:x=>flags.add(x),remove:x=>flags.delete(x)}},fonts:{ready:Promise.resolve()},querySelector:()=>main,querySelectorAll:()=>buttons,documentElement:{clientWidth:1000,clientHeight:800}},
     window:{StudioAssets:{pdf:async()=>{}},jspdf:{jsPDF:Pdf},html2canvas:async()=>{if(fail)throw new Error('render failed');return {width:3508,height:2480,toDataURL:()=> 'data:image/jpeg;base64,TEST'};},print(){throw new Error('Must never print the HTML page with browser headers');}},
-    state:{outputMode:'color',language:'en',brand:'karaz',paper:'A4',count:2},labelTemplate:'standard',isShelfTemplate:()=>false,preparePrint:()=>allowed,lastIssues:[],printPrepared:false,tr:x=>x,toast(){},showLayoutIssues(){},URL,console
+    state:{outputMode:'color',language:'en',brand:'karaz',paper:'A4',count:2},labelTemplate:'standard',isPromotionTemplate:()=>false,isShelfTemplate:()=>false,preparePrint:()=>allowed,lastIssues:[],printPrepared:false,tr:x=>x,toast(){},showLayoutIssues(){},URL,console
   });
   vm.runInContext(pdfSource,context);
   vm.runInContext('showPricePrintPreview=(blob,filename,pages)=>{printResult={blob,filename,dimensions:pages.map(p=>[p.style.width,p.style.height])};};',context);
@@ -80,6 +89,12 @@ assert.ok(!print.calls.some(x=>x[0]==='save'),'Print opens the PDF instead of do
 assert.deepEqual(JSON.parse(JSON.stringify(print.calls.find(x=>x[0]==='page'))),['page',[[210,297],'portrait']]);
 assert.equal(print.main.inert,false);assert.deepEqual(print.buttons.map(x=>x.disabled),[false,true]);assert.equal(print.root.children.length,0);
 const download=setup();await download.context.downloadPricePdf();assert.equal(download.calls.filter(x=>x[0]==='save').length,1);assert.equal(download.context.printResult,undefined);
+for(const template of ['special-offer','wholesale']){
+  const poster=setup();poster.context.labelTemplate=template;poster.context.state.outputMode='bw';
+  poster.context.grayscaleCanvas=()=>{};
+  await poster.context.downloadPricePdf();
+  assert.match(poster.calls.find(x=>x[0]==='save')[1],/^(Special_Offer|Wholesale_Price)_karaz_A4_EN_BW\.pdf$/);
+}
 const error=setup({fail:true});await error.context.downloadPricePdf({print:true});assert.equal(error.context.printResult,undefined);assert.equal(error.main.inert,false);assert.deepEqual(error.buttons.map(x=>x.disabled),[false,true]);assert.equal(error.flags.size,0);assert.match(error.status.textContent,/render failed/);
 const invalid=setup({allowed:false});await invalid.context.downloadPricePdf({print:true});assert.equal(invalid.calls.length,0);assert.equal(invalid.context.printResult,undefined);
 console.log('Exact grid dimensions, clean PDF print delivery, mixed paper sizes, downloads, validation and error recovery passed.');

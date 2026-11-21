@@ -18,6 +18,8 @@ let labelTemplate='standard';
 const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
 const SHELF_GRID={cw:80,ch:35,cols:2,rows:8,columnGap:3,rowGap:1};
 const isShelfTemplate=()=>labelTemplate==='shelf';
+const isPromotionTemplate=()=>['special-offer','wholesale'].includes(labelTemplate);
+const PROMOTION_PRINT={paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,outputMode:'bw'};
 let previousLabelLayout;
 
 function getLayout(settings=state){
@@ -93,6 +95,10 @@ function getLayout(settings=state){
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
   if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:76,invalid:false});
+  if(isPromotionTemplate())Object.assign(layout,{promotion:true,pad:8,logoH:27,logoW:settings.brand==='karaz'?47.52:31.32,
+    headerH:80,footerH:24,contentW:cw-16.4,contentH:ch-120.4,nameSize:16,nameSecondaryRatio:.86,
+    unitSize:5,unitMargin:1.5,nameLineHeight:1.3,priceSize:70,priceMargin:4,priceShift:0,
+    bw:72,barcodeH:8,barcodeText:2.5,footerPad:2});
   return layout;
 }
 
@@ -209,6 +215,16 @@ function priceMarkup(price){
   return `<div class="tag-price price-frame" style="--price-frame-ink:${ink}"><img class="price-frame-mark" style="width:${size}mm;height:${size}mm" src="data:image/svg+xml,${encodeURIComponent(badge)}" alt="" aria-hidden="true"><span class="price-frame-amount">${amount}</span></div>`;
 }
 
+function promotionHeaderMarkup(){
+  const wholesale=labelTemplate==='wholesale';
+  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?`<span>${tr('البيع')}</span><strong>${tr('بسعر الجملة')}</strong>`:`<strong>${tr('عرض خاص')}</strong>`}</div>`;
+}
+
+function promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample}){
+  const preview=index!==null;
+  return `<article class="price-tag large-label promotion-label promotion-${labelTemplate}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="rtl" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}"><div class="tag-header">${promotionHeaderMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><div class="promotion-tax">${tr('السعر شامل الضريبة')}</div><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+}
+
 function shelfTagMarkup({item, name, unit, price, nameScript, unitScript, index, editLabel, draft, sample}){
   const preview=index!==null;
   const label=state.language==='en'?'Product barcode':'باركود الصنف';
@@ -230,6 +246,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const [whole,fraction]=(priceOK?item.price:'').split('.');
   const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
   if(currentLayout.shelf)return shelfTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
+  if(currentLayout.promotion)return promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   const check=labelCheckMarkup();
   return `<article class="price-tag${check?' with-check':''}${currentLayout.compact?' compact':''}${currentLayout.large?' large-label':''}${currentLayout.micro?' micro-label':''}${currentLayout.tiny?' tiny-label':''}${currentLayout.mini?' mini-label':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="${state.language==='en'?'ltr':'rtl'}" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${check}<div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div>${promiseMarkup()}</div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
@@ -238,6 +255,7 @@ function emptySlotMarkup(index,preview){
   if(!preview)return `<div class="empty-print${state.cutLines?'':' no-cut'}"></div>`;
   const n=displayDigits(index%state.count+1),label=state.language==='en'?`Fill label ${n}`:`تعبئة البطاقة ${n}`;
   if(currentLayout.shelf)return `<article class="price-tag shelf-label shelf-empty empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span></article>`;
+  if(currentLayout.promotion)return `<article class="price-tag large-label promotion-label promotion-${labelTemplate} empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><div class="tag-header">${promotionHeaderMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
   return `<article class="price-tag empty-preview preview-slot${currentLayout.compact?' compact':''}${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
 }
 
@@ -677,18 +695,21 @@ $('sampleToggle').addEventListener('click',()=>{state.sample=!state.sample;drawP
 const labelTemplateButtons=document.querySelectorAll('[data-label-template]');
 labelTemplateButtons.forEach(button=>button.addEventListener('click',()=>{
   if(labelTemplate===button.dataset.labelTemplate)return;
-  const wasShelf=isShelfTemplate();
+  const wasFixed=isShelfTemplate()||isPromotionTemplate();
   labelTemplate=button.dataset.labelTemplate;
   labelTemplateButtons.forEach(other=>{const selected=other===button;other.classList.toggle('selected',selected);other.setAttribute('aria-pressed',String(selected));});
   $('downloadStatus').textContent='';
-  const shelf=isShelfTemplate();
-  if(shelf!==wasShelf){
-    if(shelf){previousLabelLayout=Object.fromEntries(Object.keys(SHELF_PRINT).map(key=>[key,state[key]]));Object.assign(state,SHELF_PRINT);}
+  const shelf=isShelfTemplate(),promotion=isPromotionTemplate(),fixed=shelf||promotion;
+  if(fixed||wasFixed){
+    if(!wasFixed)previousLabelLayout=Object.fromEntries(Object.keys(PROMOTION_PRINT).map(key=>[key,state[key]]));
+    if(fixed){Object.assign(state,previousLabelLayout,shelf?SHELF_PRINT:PROMOTION_PRINT);}
     else {Object.assign(state,previousLabelLayout);previousLabelLayout=null;}
-    for(const id of ['paper','orientation','margin','gap']){$(id).value=state[id];$(id).disabled=shelf;}
-    document.querySelectorAll('[data-count]').forEach(b=>{const active=Number(b.dataset.count)===state.count;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));b.disabled=shelf;});
-    document.querySelectorAll('[data-regular-layout]').forEach(el=>el.hidden=shelf);
+    for(const id of ['paper','orientation','margin','gap']){$(id).value=state[id];$(id).disabled=fixed;}
+    document.querySelectorAll('[data-count]').forEach(b=>{const active=Number(b.dataset.count)===state.count;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));b.disabled=fixed;});
+    document.querySelectorAll('[data-regular-layout]').forEach(el=>el.hidden=fixed);
+    document.querySelectorAll('[data-output-mode]').forEach(b=>{const selected=b.dataset.outputMode===state.outputMode;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));b.disabled=promotion;});
     $('shelfLayoutNote').hidden=!shelf;
+    $('promotionLayoutNote').hidden=!promotion;
     trimGrid();state.selected=Math.min(state.selected,state.cards.length-1);state.page=Math.floor(state.selected/state.count);loadForm();render();
   }else drawPreview();
   document.dispatchEvent(new Event('pricing:label-template'));

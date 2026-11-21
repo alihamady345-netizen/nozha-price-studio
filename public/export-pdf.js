@@ -57,6 +57,7 @@ async function downloadPricePdf({print=false}={}){
     if(labelTemplate==='check')filename=filename.replace(/\.pdf$/u,state.language==='en'?'_Check.pdf':'_علامة_صح.pdf');
     if(labelTemplate==='price-frame')filename=filename.replace(/\.pdf$/u,state.language==='en'?'_Price_Frame.pdf':'_صح_حول_السعر.pdf');
     if(isShelfTemplate())filename=`Shelf_${state.brand}_80x35mm_A4_${mono?'BW':'Color'}.pdf`;
+    if(labelTemplate==='special-offer'||labelTemplate==='wholesale')filename=`${labelTemplate==='wholesale'?'Wholesale_Price':'Special_Offer'}_${state.brand}_A4_${state.language.toUpperCase()}_BW.pdf`;
     document.body.classList.add('exporting');
     originalInert=main.inert;main.inert=true;
     snapshot=Array.from(document.querySelectorAll('button,input,select,textarea')).map(element=>[element,element.disabled]);

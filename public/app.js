@@ -208,6 +208,7 @@ function labelCheckMarkup(inline=false){
 
 function priceMarkup(price){
   const amount=`<span class="tag-price-inner">${price}</span>`;
+  if(labelTemplate==='wholesale')return `<div class="tag-price">${amount}${['top-left','top-right','bottom-left','bottom-right'].map(corner=>`<span class="promotion-price-corner ${corner}" aria-hidden="true"></span>`).join('')}</div>`;
   if(labelTemplate==='check'&&(currentLayout.micro||currentLayout.mini))return `<div class="tag-price inline-check-price">${labelCheckMarkup(true)}<span class="price-frame-amount">${amount}</span></div>`;
   if(labelTemplate!=='price-frame')return `<div class="tag-price">${amount}</div>`;
   const {cw,ch}=currentLayout;
@@ -248,7 +249,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const nameScript=/[\u0600-\u06ff]/u.test(name)?'ar':'en',unitScript=/[\u0600-\u06ff]/u.test(unit)?'ar':'en';
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
-  const price=priceOK?`${riyalMarkup(!!currentLayout.promotion)}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
+  const price=priceOK?`${riyalMarkup(!!currentLayout.promotion&&labelTemplate!=='wholesale')}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
   if(currentLayout.shelf)return shelfTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   if(currentLayout.promotion)return promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   const check=labelCheckMarkup();

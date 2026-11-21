@@ -47,3 +47,16 @@ html[lang] .promotion-label .barcode-number{font:2.5mm/1.35 Arial,sans-serif;mar
 html[lang] .promotion-label.empty-preview .slot-empty-content{height:100%;font-size:7mm}
 html[lang] .promotion-label.empty-preview .empty-price{font:bold 55mm/1 Arial,sans-serif}
 html[lang] .promotion-label.empty-preview .tag-footer{font-size:3.5mm;padding-top:7mm}
+
+/* The wholesale poster uses white paper and ink only for its lettering and rules. */
+html[lang] .price-tag.promotion-wholesale{border-width:.4mm}
+html[lang] .price-tag.promotion-wholesale::before{display:none}
+html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000}
+html[lang] .price-tag.promotion-wholesale .tag-price{position:relative;background:#fff;color:#000}
+html[lang] .price-tag.promotion-wholesale .tag-price::before{display:none}
+html[lang] .price-tag.promotion-wholesale .tag-price-inner{padding:.08em 5mm .1em}
+html[lang] .promotion-wholesale .promotion-price-corner{position:absolute;width:22mm;height:16mm;border:.4mm solid #000;pointer-events:none}
+html[lang] .promotion-wholesale .promotion-price-corner.top-left{top:0;left:0;border-right:0;border-bottom:0}
+html[lang] .promotion-wholesale .promotion-price-corner.top-right{top:0;right:0;border-left:0;border-bottom:0}
+html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{bottom:0;left:0;border-right:0;border-top:0}
+html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{bottom:0;right:0;border-left:0;border-top:0}

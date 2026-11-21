@@ -239,7 +239,9 @@ function shelfTagMarkup({item, name, unit, price, nameScript, unitScript, index,
 
 function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const preview=index!==null;
-  const name=latinDigits(productText(item)).replace(/٫/g,'.'),unit=latinDigits(productText(item,'unit')).replace(/٫/g,'.'),number=displayDigits(index%state.count+1);
+  const rawName=latinDigits(productText(item)).replace(/٫/g,'.');
+  const name=currentLayout.promotion?rawName.replace(/([\u0600-\u06ff])(?=\d)/gu,'$1 ').replace(/(\d)(?=[\u0600-\u06ff])/gu,'$1 '):rawName;
+  const unit=latinDigits(productText(item,'unit')).replace(/٫/g,'.'),number=displayDigits(index%state.count+1);
   const editLabel=state.language==='en'?`Edit label ${number}: ${name}`:`تعديل البطاقة ${number}: ${name}`;
   const nameScript=/[\u0600-\u06ff]/u.test(name)?'ar':'en',unitScript=/[\u0600-\u06ff]/u.test(unit)?'ar':'en';
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
@@ -402,8 +404,13 @@ function resizePreview(){
 }
 
 // Find the fewest whole-word lines that fit, then balance their visual widths.
-function balancedNameLines(text,maxWidth,measure,secondaryScale=1){
-  const words=text.trim().split(/\s+/u),n=words.length;
+function balancedNameLines(text,maxWidth,measure,secondaryScale=1,keepUnits=false){
+  const tokens=text.trim().split(/\s+/u),words=[];
+  for(let i=0;i<tokens.length;i++){
+    if(keepUnits&&/^\d+(?:\.\d+)?$/u.test(tokens[i])&&/^(?:كجم|كغ|جم|جرام|غرام|كيلو|كيلوجرام|مل|ملل|لتر|ل|حبة|حبات|قطعة|قطع|م|سم)$/u.test(tokens[i+1]||''))words.push(tokens[i]+'\u00a0'+tokens[++i]);
+    else words.push(tokens[i]);
+  }
+  const n=words.length;
   if(n<2||measure(text)<=maxWidth)return [text];
   const widths=new Map();
   const width=(a,b)=>{const key=a+':'+b;if(!widths.has(key))widths.set(key,measure(words.slice(a,b).join(' ')));return widths.get(key);};
@@ -446,8 +453,8 @@ function balanceName(name){
     const measure=value=>{probe.textContent=value;return probe.offsetWidth;};
     const paragraphs=text.split(/\r?\n/u).map(s=>s.trim()).filter(Boolean);
     lines=paragraphs.length>1
-      ?paragraphs.flatMap((s,i)=>balancedNameLines(s,name.clientWidth*.97/(i?secondaryScale:1),measure))
-      :balancedNameLines(text,name.clientWidth*.97,measure,secondaryScale);
+      ?paragraphs.flatMap((s,i)=>balancedNameLines(s,name.clientWidth*.97/(i?secondaryScale:1),measure,1,!!currentLayout.promotion))
+      :balancedNameLines(text,name.clientWidth*.97,measure,secondaryScale,!!currentLayout.promotion);
     if(lines.length>1){
       const widths=lines.map(measure);
       // A longer description must not overpower a short primary name.

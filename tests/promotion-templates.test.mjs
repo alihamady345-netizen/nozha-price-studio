@@ -34,3 +34,7 @@ for(const template of ['special-offer','wholesale']){
   assert.deepEqual(state.cards,original.cards);assert.deepEqual(state.drafts,original.drafts);
 }
 console.log('A4 monochrome posters preserve cards, drafts and the previous layout across template switches.');
+vm.runInContext(source.slice(source.indexOf('function balancedNameLines('),source.indexOf('function balanceName(')),context);
+const lines=context.balancedNameLines('شوكولاتة فاخرة 25 جم',14,text=>text.length,1,true);
+assert.ok(lines.some(line=>line.includes('25\u00a0جم')),'Keep the quantity with its unit when balancing product names');
+assert.ok(!lines.some(line=>line==='جم'));

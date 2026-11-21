@@ -60,3 +60,18 @@ html[lang] .promotion-wholesale .promotion-price-corner.top-left{top:0;left:0;bo
 html[lang] .promotion-wholesale .promotion-price-corner.top-right{top:0;right:0;border-left:0;border-bottom:0}
 html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{bottom:0;left:0;border-right:0;border-top:0}
 html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{bottom:0;right:0;border-left:0;border-top:0}
+
+/* Small typographic ornaments keep the white poster distinctive without ink fills. */
+html[lang] .promotion-wholesale .tag-header::before,
+html[lang] .promotion-wholesale .tag-header::after{height:.25mm}
+html[lang] .promotion-wholesale .promotion-heading>span{position:relative;padding:0 3mm}
+html[lang] .promotion-wholesale .promotion-heading>span::before,
+html[lang] .promotion-wholesale .promotion-heading>span::after{content:'';position:absolute;top:50%;width:14mm;border-top:.25mm solid #000}
+html[lang] .promotion-wholesale .promotion-heading>span::before{right:100%}
+html[lang] .promotion-wholesale .promotion-heading>span::after{left:100%}
+html[lang] .promotion-wholesale .promotion-heading strong::before{content:'';position:absolute;bottom:-1.5mm;left:calc(50% - 15mm);width:30mm;border-top:.25mm solid #000}
+html[lang] .promotion-wholesale .promotion-heading strong::after{content:'';position:absolute;bottom:-2.35mm;left:calc(50% - 1mm);width:2mm;height:2mm;border:.25mm solid #000;background:#fff;transform:rotate(45deg)}
+html[lang] .promotion-wholesale .promotion-price-corner.top-left{border-top-left-radius:5mm}
+html[lang] .promotion-wholesale .promotion-price-corner.top-right{border-top-right-radius:5mm}
+html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{border-bottom-left-radius:5mm}
+html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{border-bottom-right-radius:5mm}

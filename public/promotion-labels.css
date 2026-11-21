@@ -1,42 +1,47 @@
-/* A4 posters share their physical geometry across preview, PDF and print. */
+/* Physical A4 geometry shared by preview, PDF and print. */
 @font-face{font-family:PromotionDisplay;src:url('assets/Lalezar-Regular.woff') format('woff');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:PromotionProduct;src:url('assets/Tajawal-ExtraBold.woff') format('woff');font-style:normal;font-weight:800;font-display:swap}
 .label-template-switch>button[data-label-template="special-offer"],
 .label-template-switch>button[data-label-template="wholesale"]{grid-column:1/-1;min-height:50px;font-weight:700;color:#111;border-color:#aab4ad}
 .label-template-switch>button[data-label-template="special-offer"]::before{content:'★';font:20px Arial,sans-serif}
 .label-template-switch>button[data-label-template="wholesale"]::before{content:'=';font:bold 24px Arial,sans-serif}
-html[lang] .price-tag.promotion-label{display:grid;grid-template-rows:80mm minmax(0,1fr) 24mm;gap:0;padding:8mm;border:.2mm solid #000;background:#fff;color:#000;box-shadow:none}
-html[lang] .price-tag.promotion-label.no-cut{border-color:transparent}
-html[lang] .price-tag.promotion-label::before,
+html[lang] .price-tag.promotion-label{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:66mm minmax(0,1fr) 22mm;gap:0;padding:8mm;border:1mm solid #000;background:#fff;color:#000;box-shadow:none}
+html[lang] .price-tag.promotion-label.no-cut{border-color:#000}
+html[lang] .price-tag.promotion-label::before{content:'';display:block;position:absolute;inset:2mm;width:auto;height:auto;border:.25mm solid #000;background:none;pointer-events:none}
 html[lang] .price-tag.promotion-label::after{display:none}
-html[lang] .promotion-label .tag-header{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:28mm 48mm;gap:4mm;justify-content:stretch;align-content:start;justify-items:center;width:100%;height:80mm;padding:0;margin:0;border:0}
-html[lang] .promotion-label .tag-header::after{display:none}
-html[lang] .promotion-label .tag-logo{height:27mm;width:var(--tag-logo-w);filter:grayscale(1)}
-html[lang] .promotion-heading{width:100%;height:48mm;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:#fff;padding:1mm 3mm;font-family:Arabic,Arial,sans-serif;text-align:center;line-height:1.25;border:1mm solid #000}
-html[lang] .promotion-heading strong{font-family:PromotionDisplay,Arabic,Arial,sans-serif;font-size:32mm;line-height:1.3;font-weight:400;white-space:nowrap}
-html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000;border-width:1.1mm 0 1.1mm}
-html[lang] .promotion-wholesale .promotion-heading>span{font-size:8mm;font-weight:700;line-height:1.4}
-html[lang] .promotion-wholesale .promotion-heading strong{font-size:28mm;line-height:1.4}
-html[lang="ar"] .promotion-special-offer .promotion-heading strong{position:relative;padding:0 5mm}
+html[lang] .promotion-label .tag-header{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:22mm 38mm;gap:4mm;justify-content:stretch;align-content:start;justify-items:center;width:100%;height:66mm;padding:0;margin:0;border:0;line-height:normal}
+html[lang] .promotion-label .tag-header::before,
+html[lang] .promotion-label .tag-header::after{content:'';display:block;position:absolute;top:11mm;bottom:auto;width:calc(50% - 23mm);height:.45mm;background:#000;border:0}
+html[lang] .promotion-label .tag-header::before{left:0;right:auto}
+html[lang] .promotion-label .tag-header::after{right:0;left:auto}
+html[lang] .promotion-label .tag-logo{height:22mm;width:var(--tag-logo-w);filter:grayscale(1)}
+html[lang] .promotion-label .promotion-heading{position:relative;width:100%;height:38mm;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:#fff;padding:1mm 3mm;border:0;text-align:center}
+html[lang] .promotion-label .promotion-heading strong{font-family:PromotionDisplay,Arabic,Arial,sans-serif;font-size:32mm;line-height:1.12;font-weight:400;white-space:nowrap;position:relative}
+html[lang] .promotion-label .promotion-heading>span{font-family:PromotionDisplay,Arabic,sans-serif;font-size:6mm;line-height:1.1;font-weight:400;margin:0}
+html[lang] .promotion-wholesale .promotion-heading strong{font-size:25mm;line-height:1.1}
 html[lang="ar"] .promotion-special-offer .promotion-heading strong::before,
-html[lang="ar"] .promotion-special-offer .promotion-heading strong::after{content:'';position:absolute;top:54%;width:3mm;height:3mm;background:#fff;transform:rotate(45deg)}
-html[lang="ar"] .promotion-special-offer .promotion-heading strong::before{right:-8mm}
-html[lang="ar"] .promotion-special-offer .promotion-heading strong::after{left:-8mm}
-html[lang="en"] .promotion-heading strong{font-family:Arial,sans-serif;font-size:20mm;line-height:1.3}
+html[lang="ar"] .promotion-special-offer .promotion-heading strong::after{content:'';position:absolute;top:55%;width:2.5mm;height:2.5mm;background:#fff;transform:rotate(45deg)}
+html[lang="ar"] .promotion-special-offer .promotion-heading strong::before{right:-10mm}
+html[lang="ar"] .promotion-special-offer .promotion-heading strong::after{left:-10mm}
+html[lang="en"] .promotion-label .promotion-heading strong{font-family:Arial,sans-serif;font-weight:900;font-size:20mm;line-height:1.2}
 html[lang="en"] .promotion-wholesale .promotion-heading strong{font-size:18mm}
 html[lang] .promotion-label .tag-content{width:100%;height:100%;min-height:0}
-html[lang] .promotion-label .tag-name{color:#000;line-height:1.3}
-html[lang] .promotion-label .tag-unit{font-size:5mm;margin-top:1.5mm;color:#000}
-html[lang] .promotion-label .tag-unit-badge{max-width:90%;border:.25mm solid #000;border-radius:0;background:#fff;color:#000;padding:.2mm 4mm}
+html[lang] .price-tag.promotion-label .tag-name,
+html[lang] .price-tag.promotion-label .tag-name[lang="ar"]{font-family:PromotionProduct,Arabic,Arial,sans-serif;font-weight:800;color:#000;line-height:1.2}
+html[lang] .price-tag.promotion-label .tag-name-line,
+html[lang] .price-tag.promotion-label .tag-name[lang="ar"] .tag-name-line{line-height:1.2}
+html[lang] .price-tag.promotion-label .tag-unit{font-family:PromotionProduct,Arabic,Arial,sans-serif;font-weight:800;font-size:5mm;margin-top:1.5mm;color:#000;line-height:1.2}
+html[lang] .price-tag.promotion-label .tag-unit-badge{max-width:90%;border:0;border-radius:0;background:#fff;color:#000;padding:0 3mm;line-height:1.2}
 html[lang] .promotion-label .tag-unit-badge::before,
 html[lang] .promotion-label .tag-unit-badge::after{display:none}
-html[lang] .promotion-label .tag-price{color:#000;margin:4mm 0 0;line-height:1.1}
-html[lang] .promotion-label .tag-price::before{background:#fff;border:0;border-bottom:1.2mm solid #000}
-html[lang] .promotion-label .tag-price::after{display:none}
-html[lang] .promotion-label .tag-price-inner{left:0;padding:.08em 1mm .1em;line-height:1.1}
-html[lang] .promotion-label .tag-price .fraction{font-size:.38em;vertical-align:baseline}
-html[lang] .promotion-label .tag-price .riyal-symbol{width:.32em;height:.36em;margin:0 .12em;vertical-align:.025em}
-html[lang] .promotion-label .tag-footer{height:24mm;padding:1.5mm 0 0;border:0;color:#000;text-align:center}
-.promotion-tax{font-size:3.4mm;font-weight:700;line-height:1.4;margin-bottom:2mm}
+html[lang] .price-tag.promotion-label .tag-price{color:#fff;margin:4mm 0 0;line-height:1.1;background:#000}
+html[lang] .price-tag.promotion-label .tag-price::before{background:#000;border:0;border-radius:0;inset:0}
+html[lang] .price-tag.promotion-label .tag-price::after{display:none}
+html[lang] .price-tag.promotion-label .tag-price-inner{left:0;padding:.08em 1mm .1em;line-height:1.1}
+html[lang] .price-tag.promotion-label .tag-price .fraction{font-size:.38em;vertical-align:baseline}
+html[lang] .price-tag.promotion-label .tag-price .riyal-symbol{width:.32em;height:.36em;margin:0 .12em;vertical-align:.025em}
+html[lang] .price-tag.promotion-label .tag-footer{height:22mm;padding:1.5mm 0 0;border:0;color:#000;text-align:center}
+.promotion-tax{font-family:PromotionProduct,Arabic,Arial,sans-serif;font-size:3.4mm;font-weight:800;line-height:1.3;margin-bottom:1.5mm}
 html[lang] .promotion-label .tag-barcode{width:72mm;height:8mm}
 html[lang] .promotion-label .barcode-number{font:2.5mm/1.35 Arial,sans-serif;margin-top:.6mm;letter-spacing:.15mm;color:#000}
 html[lang] .promotion-label.empty-preview .slot-empty-content{height:100%;font-size:7mm}

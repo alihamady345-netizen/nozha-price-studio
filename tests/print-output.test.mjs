@@ -28,7 +28,7 @@ geometry.isPromotionTemplate=()=>true;
 for(const brand of ['nozha','karaz']){
   const l=geometry.getLayout({paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,brand});
   assert.equal(l.cw,200);assert.equal(l.ch,287);
-  assert.equal(l.promotion,true);assert.equal(l.priceSize,70);
+  assert.equal(l.promotion,true);assert.equal(l.priceSize,90);
   assert.ok(l.contentW<l.cw-2*l.pad);
   assert.ok(l.headerH+l.contentH+l.footerH+2*l.pad<=l.ch);
 }

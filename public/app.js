@@ -95,9 +95,9 @@ function getLayout(settings=state){
   layout.footerH=layout.barcodeH+layout.barcodeText*1.35+layout.footerPad+.6+(layout.mini?Math.max(layout.promiseIconH,layout.promiseSize*1.4):layout.promiseIconH+layout.promiseSize*1.4)+layout.promiseGap+.4;
   layout.contentH-=layout.footerH-previousFooter;
   if(isShelfTemplate())Object.assign(layout,SHELF_GRID,{shelf:true,bw:76,invalid:false});
-  if(isPromotionTemplate())Object.assign(layout,{promotion:true,pad:8,logoH:27,logoW:settings.brand==='karaz'?47.52:31.32,
-    headerH:80,footerH:24,contentW:cw-16.4,contentH:ch-120.4,nameSize:16,nameSecondaryRatio:.86,
-    unitSize:5,unitMargin:1.5,nameLineHeight:1.3,priceSize:70,priceMargin:4,priceShift:0,
+  if(isPromotionTemplate())Object.assign(layout,{promotion:true,pad:8,logoH:22,logoW:settings.brand==='karaz'?38.72:25.52,
+    headerH:66,footerH:22,contentW:cw-18,contentH:ch-106,nameSize:17,nameSecondaryRatio:1,
+    unitSize:5,unitMargin:1.5,nameLineHeight:1.2,priceSize:90,priceMargin:4,priceShift:0,
     bw:72,barcodeH:8,barcodeText:2.5,footerPad:2});
   return layout;
 }
@@ -192,7 +192,7 @@ function promiseMarkup(){
   const service='<path d="M15 17C3 10 9 2 15 7c6-5 12 3 0 10Z"/><path d="m3 23 5-3 7 2h8c3 0 3 4 0 4h-7m-8-6 3-3h5l5 4m-14 1 5 9 12-2 7-7c2-3-1-5-3-3l-5 3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="m1 23 5-3 6 11-5 3Z"/><path d="M15 1v2M4 5l2 2M27 5l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
   return `<div class="tag-promise" lang="ar" dir="ltr" translate="no"><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${quality}</svg><span>الجودة</span></span><i aria-hidden="true">·</i><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${price}</svg><span>السعر</span></span><i aria-hidden="true">·</i><span class="promise-item"><svg viewBox="0 0 34 35" aria-hidden="true">${service}</svg><span>الخدمة</span></span></div>`;
 }
-function riyalMarkup(){return `<img class="riyal-symbol" src="assets/saudi-riyal.svg" width="512" height="572" alt="${state.language==='en'?'Saudi riyal':'ريال سعودي'}">`;}
+function riyalMarkup(white=false){return `<img class="riyal-symbol" src="assets/saudi-riyal${white?'-white':''}.svg" width="512" height="572" alt="${state.language==='en'?'Saudi riyal':'ريال سعودي'}">`;}
 
 function labelCheckMarkup(){
   if(labelTemplate!=='check')return '';
@@ -217,7 +217,7 @@ function priceMarkup(price){
 
 function promotionHeaderMarkup(){
   const wholesale=labelTemplate==='wholesale';
-  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?`<strong>${tr('البيع بسعر الجملة')}</strong>`:`<strong>${tr('عرض خاص')}</strong>`}</div>`;
+  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale&&state.language==='ar'?`<span>${tr('البيع')}</span><strong>${tr('بسعر الجملة')}</strong>`:`<strong>${tr(wholesale?'البيع بسعر الجملة':'عرض خاص')}</strong>`}</div>`;
 }
 
 function promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample}){
@@ -244,7 +244,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const nameScript=/[\u0600-\u06ff]/u.test(name)?'ar':'en',unitScript=/[\u0600-\u06ff]/u.test(unit)?'ar':'en';
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
-  const price=priceOK?`${riyalMarkup()}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
+  const price=priceOK?`${riyalMarkup(!!currentLayout.promotion)}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
   if(currentLayout.shelf)return shelfTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   if(currentLayout.promotion)return promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   const check=labelCheckMarkup();

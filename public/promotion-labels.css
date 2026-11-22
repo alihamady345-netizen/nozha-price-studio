@@ -62,8 +62,8 @@ html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{bottom:0;lef
 html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{bottom:0;right:0;border-left:0;border-top:0}
 
 /* Small typographic ornaments keep the white poster distinctive without ink fills. */
-html[lang] .promotion-wholesale .tag-header::before,
-html[lang] .promotion-wholesale .tag-header::after{height:.25mm}
+html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before,
+html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{height:.25mm}
 html[lang] .promotion-wholesale .promotion-heading>span{position:relative;padding:0 3mm}
 html[lang] .promotion-wholesale .promotion-heading>span::before,
 html[lang] .promotion-wholesale .promotion-heading>span::after{content:'';position:absolute;top:50%;width:14mm;border-top:.25mm solid #000}

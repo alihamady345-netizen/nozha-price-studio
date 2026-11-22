@@ -58,7 +58,7 @@ html[lang] .price-tag.promotion-wholesale::after{display:none}
 .wholesale-page-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
 html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000;justify-content:center;padding:2mm 8mm}
 .wholesale-heading-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
-html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveNaskh,Arabic,serif;display:block;width:auto;height:auto;font-size:23mm;font-weight:700;line-height:1.3;transform:none}
+html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveNaskh,Arabic,serif;display:block;width:auto;height:auto;font-size:23mm;font-weight:700;line-height:1.3;transform:translateY(-1.5mm)}
 html[lang] .promotion-wholesale .promotion-heading strong::before,
 html[lang] .promotion-wholesale .promotion-heading strong::after{display:none}
 html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-2mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-family:Arabic,Arial,sans-serif;font-size:5mm;font-weight:700;line-height:1.65}

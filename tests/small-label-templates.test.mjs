@@ -3,7 +3,6 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 const source=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
 const context=vm.createContext({labelTemplate:'check',state:{outputMode:'bw',brand:'nozha'},currentLayout:{cw:34.13,ch:23.25,compact:true,micro:true,mini:false,headerH:0}});
-vm.runInContext(source.slice(source.indexOf('const isCompetitiveTemplate='),source.indexOf('const isPromotionTemplate=')),context);
 vm.runInContext(source.slice(source.indexOf('function labelCheckMarkup('),source.indexOf('function promotionHeaderMarkup(')),context);
 for(const layout of [{cw:34.13,ch:23.25,micro:true,mini:false},{cw:23.25,ch:16.06,micro:false,mini:true},{cw:10.63,ch:16.06,micro:false,mini:true}]){
   Object.assign(context.currentLayout,layout);

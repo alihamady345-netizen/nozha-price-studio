@@ -18,8 +18,7 @@ let labelTemplate='standard';
 const SHELF_PRINT={paper:'A4',orientation:'portrait',count:16,margin:5,gap:1};
 const SHELF_GRID={cw:80,ch:35,cols:2,rows:8,columnGap:3,rowGap:1};
 const isShelfTemplate=()=>labelTemplate==='shelf';
-const isCompetitiveTemplate=()=>['wholesale','competitive-stack'].includes(labelTemplate);
-const isPromotionTemplate=()=>['special-offer','wholesale','competitive-stack'].includes(labelTemplate);
+const isPromotionTemplate=()=>['special-offer','wholesale'].includes(labelTemplate);
 const PROMOTION_PRINT={paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,outputMode:'bw'};
 let previousLabelLayout;
 
@@ -100,7 +99,6 @@ function getLayout(settings=state){
     headerH:66,footerH:22,contentW:cw-18,contentH:ch-106,nameSize:17,nameSecondaryRatio:1,
     unitSize:5,unitMargin:1.5,nameLineHeight:1.2,priceSize:90,priceMargin:4,priceShift:0,
     bw:72,barcodeH:8,barcodeText:2.5,footerPad:2});
-  if(isPromotionTemplate()&&labelTemplate==='competitive-stack')Object.assign(layout,{headerH:74,contentH:ch-114});
   return layout;
 }
 
@@ -210,7 +208,7 @@ function labelCheckMarkup(inline=false){
 
 function priceMarkup(price){
   const amount=`<span class="tag-price-inner">${price}</span>`;
-  if(isCompetitiveTemplate())return `<div class="tag-price">${amount}</div>`;
+  if(labelTemplate==='wholesale')return `<div class="tag-price">${amount}</div>`;
   if(labelTemplate==='check'&&(currentLayout.micro||currentLayout.mini))return `<div class="tag-price inline-check-price">${labelCheckMarkup(true)}<span class="price-frame-amount">${amount}</span></div>`;
   if(labelTemplate!=='price-frame')return `<div class="tag-price">${amount}</div>`;
   const {cw,ch}=currentLayout;
@@ -221,17 +219,15 @@ function priceMarkup(price){
 }
 
 function promotionHeaderMarkup(){
-  const wholesale=isCompetitiveTemplate(),stacked=labelTemplate==='competitive-stack';
-  const frame=wholesale?`<img class="wholesale-heading-frame" src="assets/${stacked?'competitive-stack-heading':'wholesale-heading-frame'}.svg" alt="" aria-hidden="true">`:'';
-  const title=stacked?`<span>${tr('البيع')}</span><strong>${tr('بسعر تنافسي')}</strong>`:`<strong>${tr(wholesale?'البيع بسعر تنافسي':'عرض خاص')}</strong>`;
-  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${frame}${title}</div>`;
+  const wholesale=labelTemplate==='wholesale';
+  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?'<img class="wholesale-heading-frame" src="assets/wholesale-heading-frame.svg" alt="" aria-hidden="true">':''}<strong>${tr(wholesale?'البيع بسعر تنافسي':'عرض خاص')}</strong></div>`;
 }
 
-function promotionFrameMarkup(){return isCompetitiveTemplate()?'<img class="wholesale-page-frame" src="assets/wholesale-page-frame.svg" alt="" aria-hidden="true">':'';}
+function promotionFrameMarkup(){return labelTemplate==='wholesale'?'<img class="wholesale-page-frame" src="assets/wholesale-page-frame.svg" alt="" aria-hidden="true">':'';}
 
 function promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample}){
   const preview=index!==null;
-  return `<article class="price-tag large-label promotion-label promotion-${labelTemplate}${labelTemplate==='competitive-stack'?' promotion-wholesale':''}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="rtl" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${promotionFrameMarkup()}<div class="tag-header">${promotionHeaderMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><div class="promotion-tax">${tr('السعر شامل الضريبة')}</div><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
+  return `<article class="price-tag large-label promotion-label promotion-${labelTemplate}${state.cutLines?'':' no-cut'}${preview?' preview-slot':''}${preview&&index===state.selected?' slot-selected':''}" dir="rtl" data-missing-name="${!name.trim()}" ${preview?`data-slot="${index}" role="button" tabindex="0" aria-label="${escapeHtml(editLabel)}" aria-pressed="${index===state.selected}"`:''} data-barcode="${escapeHtml(item.barcode||'')}" data-format="${item.format||'CODE128'}">${promotionFrameMarkup()}<div class="tag-header">${promotionHeaderMarkup()}</div><div class="tag-content"><div class="tag-content-inner"><div class="tag-product"><div class="tag-name" lang="${nameScript}" dir="${nameScript==='ar'?'rtl':'ltr'}">${escapeHtml(name||tr('تعريف الصنف'))}</div>${unit?`<div class="tag-unit" lang="${unitScript}" dir="${unitScript==='ar'?'rtl':'ltr'}"><span class="tag-unit-badge">${escapeHtml(unit)}</span></div>`:''}</div>${priceMarkup(price)}</div></div><div class="tag-footer"><div class="promotion-tax">${tr('السعر شامل الضريبة')}</div><svg class="tag-barcode" aria-label="${state.language==='en'?'Product barcode':'باركود الصنف'}"></svg><div class="barcode-number">${escapeHtml(item.barcode||'')}</div></div>${draft?`<span class="draft-marker">${tr('تعديل غير محفوظ')}</span>`:sample?`<span class="draft-marker example-marker">${tr('مثال توضيحي')}</span>`:''}</article>`;
 }
 
 function shelfTagMarkup({item, name, unit, price, nameScript, unitScript, index, editLabel, draft, sample}){
@@ -255,7 +251,7 @@ function tagMarkup(item,index=null,{draft=false,sample=false}={}){
   const nameScript=/[\u0600-\u06ff]/u.test(name)?'ar':'en',unitScript=/[\u0600-\u06ff]/u.test(unit)?'ar':'en';
   const priceOK=/^\d+\.\d{2}$/.test(item.price||'');
   const [whole,fraction]=(priceOK?item.price:'').split('.');
-  const price=priceOK?`${riyalMarkup(!!currentLayout.promotion&&!isCompetitiveTemplate())}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
+  const price=priceOK?`${riyalMarkup(!!currentLayout.promotion&&labelTemplate!=='wholesale')}<span class="whole">${whole}</span><span class="fraction">.${fraction}</span>`:'<span class="whole">—</span>';
   if(currentLayout.shelf)return shelfTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   if(currentLayout.promotion)return promotionTagMarkup({item,name,unit,price,nameScript,unitScript,index,editLabel,draft,sample});
   const check=labelCheckMarkup();
@@ -266,7 +262,7 @@ function emptySlotMarkup(index,preview){
   if(!preview)return `<div class="empty-print${state.cutLines?'':' no-cut'}"></div>`;
   const n=displayDigits(index%state.count+1),label=state.language==='en'?`Fill label ${n}`:`تعبئة البطاقة ${n}`;
   if(currentLayout.shelf)return `<article class="price-tag shelf-label shelf-empty empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span></article>`;
-  if(currentLayout.promotion)return `<article class="price-tag large-label promotion-label promotion-${labelTemplate}${labelTemplate==='competitive-stack'?' promotion-wholesale':''} empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}">${promotionFrameMarkup()}<div class="tag-header">${promotionHeaderMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
+  if(currentLayout.promotion)return `<article class="price-tag large-label promotion-label promotion-${labelTemplate} empty-preview preview-slot${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}">${promotionFrameMarkup()}<div class="tag-header">${promotionHeaderMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
   return `<article class="price-tag empty-preview preview-slot${currentLayout.compact?' compact':''}${index===state.selected?' slot-selected':''}" data-slot="${index}" role="button" tabindex="0" aria-label="${label}" aria-pressed="${index===state.selected}"><div class="tag-header">${logoMarkup()}${signatureMarkup()}</div><div class="slot-empty-content"><strong>${tr('تعريف الصنف')}</strong><span>${tr('اضغط لإدخال البيانات')}</span><div class="empty-price">—</div></div><div class="tag-footer">${tr('اسم الصنف · السعر · الباركود')}</div></article>`;
 }
 

@@ -24,7 +24,6 @@ const englishText=new Map(Object.entries({
   'مقاس الورق':'Paper size','اتجاه الورق':'Orientation','عمودي':'Portrait','أفقي':'Landscape',
   'تقسيم الورقة':'Labels per sheet','مقاس البطاقة':'Label size','ألوان الورقة':'Sheet colors',
   'نوع الفورمة':'Label template','فورمة عادية':'Standard','فورمة بعلامة صح':'With check mark','فورمة صح حول السعر':'Check mark around price',
-  'تنافسي — تصميم فني':'Competitive price — artistic layout',
   'عرض خاص':'Special offer','البيع بسعر تنافسي':'Competitive price','البيع':'Buy at','بسعر تنافسي':'Competitive price',
   'A4 عمودي · صنف واحد لكل ورقة · أبيض وأسود · هامش ٥ مم. اطبع بالحجم الفعلي 100%.':'A4 portrait · one product per sheet · black & white · 5 mm margins. Print at actual size (100%).',
   'فورمة للشيلف':'Shelf label','السعر شامل الضريبة':'Price incl. VAT',

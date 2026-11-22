@@ -80,13 +80,3 @@ html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"],
 html[lang] .price-tag.promotion-wholesale .promotion-tax{font-family:CompetitiveNaskh,Arabic,serif;font-weight:700;line-height:1.5}
 
 html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"] .tag-unit-badge{font-weight:700;line-height:1.65}
-
-/* Additional two-line composition; the original competitive form stays available. */
-.label-template-switch>button[data-label-template="competitive-stack"]{grid-column:1/-1;min-height:50px;font-weight:700;color:#111;border-color:#aab4ad}
-html[lang] .price-tag.promotion-competitive-stack{grid-template-rows:74mm minmax(0,1fr) 22mm}
-html[lang] .promotion-competitive-stack .tag-header{height:74mm;grid-template-rows:22mm 46mm}
-html[lang] .promotion-competitive-stack .promotion-heading{height:46mm;padding:0 8mm}
-html[lang] .promotion-competitive-stack .promotion-heading>span{top:-.5mm;padding:0 6mm;font-family:CompetitiveNaskh,Arabic,serif;font-size:8mm;font-weight:700;line-height:1.3}
-html[lang="ar"] .promotion-competitive-stack .promotion-heading strong{position:absolute;top:9mm;left:0;width:100%;height:auto;font-family:CompetitiveNaskh,Arabic,serif;font-size:26mm;font-weight:700;line-height:1.2;transform:none}
-html[lang="en"] .promotion-competitive-stack .promotion-heading>span{font-family:Arial,sans-serif;font-size:5.5mm;top:0}
-html[lang="en"] .promotion-competitive-stack .promotion-heading strong{position:absolute;top:15mm;left:0;width:100%;font-size:18mm;line-height:1.2;transform:none}

@@ -80,3 +80,10 @@ html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"],
 html[lang] .price-tag.promotion-wholesale .promotion-tax{font-family:CompetitiveNaskh,Arabic,serif;font-weight:700;line-height:1.5}
 
 html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"] .tag-unit-badge{font-weight:700;line-height:1.65}
+
+/* Fine, mirrored rules accent the selling unit without filling the page. */
+html[lang] .price-tag.promotion-wholesale .tag-unit-badge{max-width:calc(100% - 32mm)}
+html[lang] .price-tag.promotion-wholesale .tag-unit-badge::before,
+html[lang] .price-tag.promotion-wholesale .tag-unit-badge::after{content:'';display:block;position:absolute;top:50%;width:12mm;height:.2mm;background:#000;border:0;transform:translateY(-50%);pointer-events:none}
+html[lang] .price-tag.promotion-wholesale .tag-unit-badge::before{right:calc(100% + 1.5mm);left:auto}
+html[lang] .price-tag.promotion-wholesale .tag-unit-badge::after{left:calc(100% + 1.5mm);right:auto}

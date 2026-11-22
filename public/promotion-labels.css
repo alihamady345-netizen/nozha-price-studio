@@ -48,30 +48,25 @@ html[lang] .promotion-label.empty-preview .slot-empty-content{height:100%;font-s
 html[lang] .promotion-label.empty-preview .empty-price{font:bold 55mm/1 Arial,sans-serif}
 html[lang] .promotion-label.empty-preview .tag-footer{font-size:3.5mm;padding-top:7mm}
 
-/* The wholesale poster uses white paper and ink only for its lettering and rules. */
-html[lang] .price-tag.promotion-wholesale{border:.5mm solid #000}
-html[lang] .price-tag.promotion-wholesale::before{display:none}
-html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000}
-html[lang] .price-tag.promotion-wholesale .tag-price{position:relative;background:#fff;color:#000;border:.4mm solid #000;border-radius:4mm}
-html[lang] .price-tag.promotion-wholesale .tag-price::before{display:none}
-html[lang] .price-tag.promotion-wholesale .tag-price-inner{padding:.08em 5mm .1em}
-html[lang] .promotion-wholesale .promotion-price-corner{display:none}
-html[lang] .promotion-wholesale .promotion-price-corner.top-left{top:0;left:0;border-right:0;border-bottom:0}
-html[lang] .promotion-wholesale .promotion-price-corner.top-right{top:0;right:0;border-left:0;border-bottom:0}
-html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{bottom:0;left:0;border-right:0;border-top:0}
-html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{bottom:0;right:0;border-left:0;border-top:0}
-
-/* Small typographic ornaments keep the white poster distinctive without ink fills. */
+/* Wholesale artwork is mirrored in one SVG, with equal price insets. */
+html[lang] .price-tag.promotion-wholesale{border:.5mm solid transparent}
+html[lang] .price-tag.promotion-wholesale::before,
+html[lang] .price-tag.promotion-wholesale::after{display:none}
+.wholesale-page-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
+html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000;justify-content:center;padding:3mm 8mm}
+.wholesale-heading-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
+html[lang] .promotion-wholesale .promotion-heading strong{font-size:23mm;line-height:1.12}
+html[lang] .promotion-wholesale .promotion-heading strong::before,
+html[lang] .promotion-wholesale .promotion-heading strong::after{display:none}
+html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-1.5mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-size:6mm;line-height:1.2}
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before,
-html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{height:.25mm}
-html[lang] .promotion-wholesale .promotion-heading>span{position:relative;padding:0 3mm}
-html[lang] .promotion-wholesale .promotion-heading>span::before,
-html[lang] .promotion-wholesale .promotion-heading>span::after{content:'';position:absolute;top:50%;width:14mm;border-top:.25mm solid #000}
-html[lang] .promotion-wholesale .promotion-heading>span::before{right:100%}
-html[lang] .promotion-wholesale .promotion-heading>span::after{left:100%}
-html[lang] .promotion-wholesale .promotion-heading strong::before{content:'';position:absolute;bottom:-1.5mm;left:calc(50% - 15mm);width:30mm;border-top:.25mm solid #000}
-html[lang] .promotion-wholesale .promotion-heading strong::after{content:'';position:absolute;bottom:-2.35mm;left:calc(50% - 1mm);width:2mm;height:2mm;border:.25mm solid #000;background:#fff;transform:rotate(45deg)}
-html[lang] .promotion-wholesale .promotion-price-corner.top-left{border-top-left-radius:5mm}
-html[lang] .promotion-wholesale .promotion-price-corner.top-right{border-top-right-radius:5mm}
-html[lang] .promotion-wholesale .promotion-price-corner.bottom-left{border-bottom-left-radius:5mm}
-html[lang] .promotion-wholesale .promotion-price-corner.bottom-right{border-bottom-right-radius:5mm}
+html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{top:11mm;bottom:auto;left:auto;right:auto;width:calc(50% - 25mm);height:.3mm;background:#000}
+html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before{left:0}
+html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{right:0}
+html[lang] .price-tag.promotion-wholesale .tag-price{position:relative;background:#fff;color:#000;border:.4mm solid #000;border-radius:4mm;padding:7mm 9mm}
+html[lang] .price-tag.promotion-wholesale .tag-price::before,
+html[lang] .price-tag.promotion-wholesale .tag-price::after{display:none}
+html[lang] .price-tag.promotion-wholesale .tag-price-inner{display:inline-flex;align-items:baseline;gap:0;left:0;padding:0;line-height:1;vertical-align:middle}
+html[lang] .price-tag.promotion-wholesale .tag-price .whole{line-height:1}
+html[lang] .price-tag.promotion-wholesale .tag-price .fraction{line-height:1;font-size:.38em}
+html[lang] .price-tag.promotion-wholesale .tag-price .riyal-symbol{align-self:center;width:.3em;height:.335em;margin:0 .13em 0 0;vertical-align:baseline}

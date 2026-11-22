@@ -48,7 +48,7 @@ html[lang] .promotion-label.empty-preview .slot-empty-content{height:100%;font-s
 html[lang] .promotion-label.empty-preview .empty-price{font:bold 55mm/1 Arial,sans-serif}
 html[lang] .promotion-label.empty-preview .tag-footer{font-size:3.5mm;padding-top:7mm}
 
-@font-face{font-family:CompetitiveArabic;src:url('assets/IBMPlexSansArabic-Bold.woff') format('woff');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:CompetitiveArabic;src:url('assets/Cairo-Black.woff') format('woff');font-style:normal;font-weight:1000;font-display:swap}
 
 /* Wholesale artwork is mirrored in one SVG, with equal price insets. */
 html[lang] .price-tag.promotion-wholesale{border:.5mm solid transparent}
@@ -57,10 +57,10 @@ html[lang] .price-tag.promotion-wholesale::after{display:none}
 .wholesale-page-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
 html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000;justify-content:center;padding:2mm 8mm}
 .wholesale-heading-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
-html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:23mm;font-weight:700;line-height:1.35}
+html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:23mm;font-weight:1000;line-height:1.35;transform:translateY(-.24em)}
 html[lang] .promotion-wholesale .promotion-heading strong::before,
 html[lang] .promotion-wholesale .promotion-heading strong::after{display:none}
-html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-2mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:5mm;font-weight:700;line-height:1.5}
+html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-2mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:5mm;font-weight:1000;line-height:1.6}
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before,
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{top:11mm;bottom:auto;left:auto;right:auto;width:calc(50% - 25mm);height:.3mm;background:#000}
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before{left:0}
@@ -73,7 +73,11 @@ html[lang] .price-tag.promotion-wholesale .tag-price .whole{line-height:1}
 html[lang] .price-tag.promotion-wholesale .tag-price .fraction{line-height:1;font-size:.38em}
 html[lang] .price-tag.promotion-wholesale .tag-price .riyal-symbol{align-self:center;width:.3em;height:.335em;margin:0 .13em 0 0;vertical-align:baseline}
 
-html[lang] .promotion-wholesale .tag-name[lang="ar"],
-html[lang] .promotion-wholesale .tag-name[lang="ar"] .tag-name-line,
-html[lang] .promotion-wholesale .tag-unit[lang="ar"],
-html[lang] .promotion-wholesale .promotion-tax{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-weight:700;line-height:1.5}
+html[lang] .price-tag.promotion-wholesale .tag-name[lang="ar"],
+html[lang] .price-tag.promotion-wholesale .tag-name[lang="ar"] .tag-name-line,
+html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"],
+html[lang] .price-tag.promotion-wholesale .promotion-tax{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-weight:1000;line-height:1.6}
+
+/* Center Cairo’s painted Arabic glyphs, including the dots, in their line boxes. */
+html[lang] .price-tag.promotion-wholesale .tag-name[lang="ar"] .tag-name-line{transform:translateY(-.24em)}
+html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"] .tag-unit-badge{display:inline-block;transform:translateY(-.24em)}

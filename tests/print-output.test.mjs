@@ -4,7 +4,7 @@ import vm from 'node:vm';
 
 const app=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
 const pdfSource=readFileSync(new URL('../public/export-pdf.js',import.meta.url),'utf8');
-const geometry=vm.createContext({state:{margin:5,gap:2},PAPER:{A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]},isPromotionTemplate:()=>false,isShelfTemplate:()=>false});
+const geometry=vm.createContext({labelTemplate:'standard',state:{margin:5,gap:2},PAPER:{A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]},isPromotionTemplate:()=>false,isShelfTemplate:()=>false});
 vm.runInContext(app.slice(app.indexOf('function getLayout('),app.indexOf('function updateLayout(')),geometry);
 for(const paper of ['A3','A4','A5','A6'])for(const orientation of ['portrait','landscape'])for(const count of [1,2,4,5,6,8,12,16,20,32,64,128,256])for(const margin of [3,5,15])for(const gap of [0,1,2,5]){
   const l=geometry.getLayout({paper,orientation,count,margin,gap,brand:'karaz'});
@@ -32,7 +32,10 @@ for(const brand of ['nozha','karaz']){
   assert.ok(l.contentW<l.cw-2*l.pad);
   assert.ok(l.headerH+l.contentH+l.footerH+2*l.pad<=l.ch);
 }
-geometry.isPromotionTemplate=()=>false;
+geometry.labelTemplate='competitive-stack';
+const stacked=geometry.getLayout({paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,brand:'nozha'});
+assert.equal(stacked.headerH,74);assert.ok(stacked.headerH+stacked.contentH+stacked.footerH+2*stacked.pad<=stacked.ch);
+geometry.labelTemplate='standard';geometry.isPromotionTemplate=()=>false;
 
 // Company signs must use the same 210 x 99 mm strips when printed and exported.
 const designs=readFileSync(new URL('../public/designs.js',import.meta.url),'utf8');
@@ -89,11 +92,11 @@ assert.ok(!print.calls.some(x=>x[0]==='save'),'Print opens the PDF instead of do
 assert.deepEqual(JSON.parse(JSON.stringify(print.calls.find(x=>x[0]==='page'))),['page',[[210,297],'portrait']]);
 assert.equal(print.main.inert,false);assert.deepEqual(print.buttons.map(x=>x.disabled),[false,true]);assert.equal(print.root.children.length,0);
 const download=setup();await download.context.downloadPricePdf();assert.equal(download.calls.filter(x=>x[0]==='save').length,1);assert.equal(download.context.printResult,undefined);
-for(const template of ['special-offer','wholesale']){
-  const poster=setup();poster.context.labelTemplate=template;poster.context.state.outputMode='bw';
+for(const template of ['special-offer','wholesale','competitive-stack']){
+  const poster=setup();poster.context.labelTemplate=template;poster.context.isPromotionTemplate=()=>true;poster.context.state.outputMode='bw';
   poster.context.grayscaleCanvas=()=>{};
   await poster.context.downloadPricePdf();
-  assert.match(poster.calls.find(x=>x[0]==='save')[1],/^(Special_Offer|Wholesale_Price)_karaz_A4_EN_BW\.pdf$/);
+  assert.match(poster.calls.find(x=>x[0]==='save')[1],/^(Special_Offer|Wholesale_Price|Competitive_Price_Stacked)_karaz_A4_EN_BW\.pdf$/);
 }
 const error=setup({fail:true});await error.context.downloadPricePdf({print:true});assert.equal(error.context.printResult,undefined);assert.equal(error.main.inert,false);assert.deepEqual(error.buttons.map(x=>x.disabled),[false,true]);assert.equal(error.flags.size,0);assert.match(error.status.textContent,/render failed/);
 const invalid=setup({allowed:false});await invalid.context.downloadPricePdf({print:true});assert.equal(invalid.calls.length,0);assert.equal(invalid.context.printResult,undefined);

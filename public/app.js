@@ -220,7 +220,7 @@ function priceMarkup(price){
 
 function promotionHeaderMarkup(){
   const wholesale=labelTemplate==='wholesale';
-  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?'<img class="wholesale-heading-frame" src="assets/wholesale-heading-frame.svg" alt="" aria-hidden="true">':''}${wholesale&&state.language==='ar'?`<span>${tr('البيع')}</span><strong class="competitive-art-title"><img class="competitive-title-art" src="assets/competitive-title-art.svg" alt="${tr('بسعر تنافسي')}"></strong>`:`<strong>${tr(wholesale?'البيع بسعر تنافسي':'عرض خاص')}</strong>`}</div>`;
+  return `${logoMarkup()}<div class="promotion-heading" lang="${state.language}" dir="${state.language==='en'?'ltr':'rtl'}">${wholesale?'<img class="wholesale-heading-frame" src="assets/wholesale-heading-frame.svg" alt="" aria-hidden="true">':''}${wholesale&&state.language==='ar'?`<span>${tr('البيع')}</span><strong>${tr('بسعر تنافسي')}</strong>`:`<strong>${tr(wholesale?'البيع بسعر تنافسي':'عرض خاص')}</strong>`}</div>`;
 }
 
 function promotionFrameMarkup(){return labelTemplate==='wholesale'?'<img class="wholesale-page-frame" src="assets/wholesale-page-frame.svg" alt="" aria-hidden="true">':'';}

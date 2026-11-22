@@ -1,6 +1,6 @@
 /* Physical A4 geometry shared by preview, PDF and print. */
 @font-face{font-family:PromotionDisplay;src:url('assets/Lalezar-Regular.woff') format('woff');font-style:normal;font-weight:400;font-display:swap}
-@font-face{font-family:PromotionProduct;src:url('assets/Tajawal-ExtraBold.woff') format('woff');font-style:normal;font-weight:800;font-display:swap}
+@font-face{font-family:PromotionProduct;src:url('assets/Tajawal-ExtraBold.woff') format('woff');font-style:normal;font-weight:700;font-display:swap}
 .label-template-switch>button[data-label-template="special-offer"],
 .label-template-switch>button[data-label-template="wholesale"]{grid-column:1/-1;min-height:50px;font-weight:700;color:#111;border-color:#aab4ad}
 .label-template-switch>button[data-label-template="special-offer"]::before{content:'★';font:20px Arial,sans-serif}
@@ -48,7 +48,7 @@ html[lang] .promotion-label.empty-preview .slot-empty-content{height:100%;font-s
 html[lang] .promotion-label.empty-preview .empty-price{font:bold 55mm/1 Arial,sans-serif}
 html[lang] .promotion-label.empty-preview .tag-footer{font-size:3.5mm;padding-top:7mm}
 
-@font-face{font-family:CompetitiveArabic;src:url('assets/Almarai-ExtraBold.woff') format('woff');font-style:normal;font-weight:800;font-display:swap}
+@font-face{font-family:CompetitiveArabic;src:url('assets/Almarai-Bold.woff') format('woff');font-style:normal;font-weight:700;font-display:swap}
 
 /* Wholesale artwork is mirrored in one SVG, with equal price insets. */
 html[lang] .price-tag.promotion-wholesale{border:.5mm solid transparent}
@@ -57,10 +57,10 @@ html[lang] .price-tag.promotion-wholesale::after{display:none}
 .wholesale-page-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
 html[lang] .promotion-wholesale .promotion-heading{background:#fff;color:#000;justify-content:center;padding:2mm 8mm}
 .wholesale-heading-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none}
-html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;display:grid;place-items:center;width:100%;height:28mm;font-size:0;line-height:0;transform:none}
+html[lang="ar"] .promotion-wholesale .promotion-heading strong{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;display:block;width:auto;height:auto;font-size:22mm;font-weight:700;line-height:1.4;transform:translateY(-.18em)}
 html[lang] .promotion-wholesale .promotion-heading strong::before,
 html[lang] .promotion-wholesale .promotion-heading strong::after{display:none}
-html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-2mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:5mm;font-weight:800;line-height:1.35}
+html[lang] .promotion-wholesale .promotion-heading>span{position:absolute;top:-2mm;left:50%;transform:translateX(-50%);z-index:1;background:#fff;padding:0 6mm;font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-size:5mm;font-weight:700;line-height:1.5}
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before,
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::after{top:11mm;bottom:auto;left:auto;right:auto;width:calc(50% - 25mm);height:.3mm;background:#000}
 html[lang][data-output-mode="bw"] .promotion-wholesale .tag-header::before{left:0}
@@ -76,8 +76,6 @@ html[lang] .price-tag.promotion-wholesale .tag-price .riyal-symbol{align-self:ce
 html[lang] .price-tag.promotion-wholesale .tag-name[lang="ar"],
 html[lang] .price-tag.promotion-wholesale .tag-name[lang="ar"] .tag-name-line,
 html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"],
-html[lang] .price-tag.promotion-wholesale .promotion-tax{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-weight:800;line-height:1.35}
+html[lang] .price-tag.promotion-wholesale .promotion-tax{font-family:CompetitiveArabic,Arabic,Arial,sans-serif;font-weight:700;line-height:1.5}
 
-/* Outlined Arabic title is identical across devices and PDF export. */
-html[lang] .promotion-wholesale .competitive-title-art{display:block;width:152mm;height:27mm;max-width:100%;object-fit:fill}
-html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"] .tag-unit-badge{font-weight:800;line-height:1.35}
+html[lang] .price-tag.promotion-wholesale .tag-unit[lang="ar"] .tag-unit-badge{font-weight:700;line-height:1.5}

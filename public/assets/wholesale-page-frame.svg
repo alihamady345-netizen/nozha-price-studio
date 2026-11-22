@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 287" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="287" viewBox="0 0 200 287" preserveAspectRatio="none">
   <g fill="none" stroke="#000" stroke-linecap="square">
     <rect x=".5" y=".5" width="199" height="286" stroke-width=".45"/>
     <path d="M3 14V3H14M186 3H197V14M197 273V284H186M14 284H3V273" stroke-width=".2"/>

@@ -64,7 +64,7 @@ async function downloadPricePdf({print=false}={}){
     for(const [element]of snapshot)element.disabled=true;
     originalRootStyle=root.getAttribute('style');
     Object.assign(root.style,{display:'block',position:'fixed',left:'0',top:'0',zIndex:'-1',pointerEvents:'none'});
-    const images=Array.from(root.querySelectorAll('svg image,img.riyal-symbol,img.wholesale-page-frame,img.wholesale-heading-frame'));
+    const images=Array.from(root.querySelectorAll('svg image,img.riyal-symbol,img.wholesale-page-frame,img.wholesale-heading-frame,img.competitive-title-art'));
     await Promise.all(images.map(async image=>{const attribute=image.tagName.toLowerCase()==='img'?'src':'href',href=image.getAttribute(attribute);if(href&&!href.startsWith('data:'))image.setAttribute(attribute,await pdfAssetDataUrl(href));}));
     const orientation=width>height?'landscape':'portrait';
     const pdf=new Pdf({unit:'mm',format:[width,height],orientation,compress:true});

@@ -1,10 +1,12 @@
 'use strict';
 const $ = id => document.getElementById(id);
-const state = { language:new URL(location.href).searchParams.get('lang')==='en'?'en':'ar', brand:'nozha', paper:'A4', orientation:'portrait', count:6, margin:5, gap:5, cutLines:true, outputMode:'color', cards:Array(6).fill(null), drafts:{}, page:0, selected:0, sample:false };
+const state = { language:new URL(location.href).searchParams.get('lang')==='en'?'en':'ar', brand:'nozha', paper:'A4', orientation:'portrait', count:6, margin:5, gap:10, cutLines:true, outputMode:'color', cards:Array(6).fill(null), drafts:{}, page:0, selected:0, sample:false };
 const PAPER = {A3:[297,420],A4:[210,297],A5:[148,210],A6:[105,148]};
 // The same A4 label divisions are used for manual entry and Excel imports.
 const LABEL_PRESETS={A4:[1,'portrait'],A5:[2,'landscape'],A6:[4,'portrait'],A7:[8,'landscape'],A8:[16,'portrait'],A9:[32,'portrait'],A10:[64,'landscape'],A11:[128,'portrait'],A12:[256,'portrait']};
-const presetSpacing=count=>({margin:5,gap:count<32?5:2});
+// Cutting through the gutter leaves 5 mm on both neighbouring labels,
+// matching the outside paper margin. Micro labels retain their compact grid.
+const presetSpacing=count=>({margin:5,gap:count<32?10:2});
 const arabicDigits = value => String(value).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const latinDigits = value => String(value).replace(/[٠-٩۰-۹]/g,d=>String((d.charCodeAt(0)-0x660)%16));
 const escapeHtml = value => String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -60,7 +62,8 @@ function getLayout(settings=state){
   const promiseGap=compact?.6:large?2.5:1;
   const footerH=barcodeH+barcodeText*1.35+footerPad+.6+promiseSize*1.4+promiseGap;
   const unitMargin=compact?.2:large?2:.5;
-  const contentW=Math.max(1,cw-2*pad-.4);
+  const frameBorder=.3;
+  const contentW=Math.max(1,cw-2*pad-2*frameBorder);
   const priceShift=Math.min(3,contentW*.02);
   const layout={w,h,cols,rows,cw,ch,invalid,compact,large,pad,bw,unitMargin,nameLineHeight,priceShift,
     logoW,logoH,
@@ -71,7 +74,7 @@ function getLayout(settings=state){
     currencySize:compact?2:large?clamp(ch*.03,3,7):clamp(ch*.025,2.4,5.5),
     barcodeH,barcodeText,
     headerH,footerH,promiseSize,promiseGap,
-    contentH:Math.max(0,ch-2*pad-.4-headerH-footerH),
+    contentH:Math.max(0,ch-2*pad-2*frameBorder-headerH-footerH),
     contentW,
     productPad:0,
     priceMargin:compact?.3:large?clamp(ch*.035,3,11):clamp(ch*.02,1,5),
@@ -307,17 +310,18 @@ function appendSheetCutMarks(paper,l){
   marks.className='sheet-cut-marks';marks.setAttribute('aria-hidden','true');
   const line=(x,y,w,h)=>segments.push(`<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${h}mm"></i>`);
   const margin=state.margin,gap=state.gap,thickness=.15,length=Math.min(2,margin-.8);
-  const edges=(count,size)=>Array.from({length:count},(_,i)=>[margin+i*(size+gap),margin+i*(size+gap)+size]).flat();
-  // Marks lie outside the labels, leaving their printed dimensions unchanged.
-  for(const x of new Set(edges(l.cols,l.cw))){
+  // Cut at the centre of each gutter, never along a printed frame.
+  const cuts=(count,size)=>Array.from({length:count-1},(_,i)=>margin+(i+1)*size+(i+.5)*gap);
+  const vertical=cuts(l.cols,l.cw),horizontal=cuts(l.rows,l.ch);
+  for(const x of vertical){
     line(x-thickness/2,margin-.5-length,thickness,length);
     line(x-thickness/2,l.h-margin+.5,thickness,length);
-    if(gap>=.6)for(let row=1;row<l.rows;row++)line(x-thickness/2,margin+row*(l.ch+gap)-gap+.2,thickness,gap-.4);
+    if(gap>=.6)for(const y of horizontal)line(x-thickness/2,y-Math.min(length,gap-.4)/2,thickness,Math.min(length,gap-.4));
   }
-  for(const y of new Set(edges(l.rows,l.ch))){
+  for(const y of horizontal){
     line(margin-.5-length,y-thickness/2,length,thickness);
     line(l.w-margin+.5,y-thickness/2,length,thickness);
-    if(gap>=.6)for(let col=1;col<l.cols;col++)line(margin+col*(l.cw+gap)-gap+.2,y-thickness/2,gap-.4,thickness);
+    if(gap>=.6)for(const x of vertical)line(x-Math.min(length,gap-.4)/2,y-thickness/2,Math.min(length,gap-.4),thickness);
   }
   marks.innerHTML=segments.join('');paper.append(marks);
 }
@@ -690,7 +694,7 @@ $('labelPreset').addEventListener('change',()=>{
 });
 for(const id of ['margin','gap']){
   const updateSpacing=event=>{
-    let value=Number($(id).value);const min=id==='margin'?3:0,max=id==='margin'?15:5;
+    let value=Number($(id).value);const min=id==='margin'?3:0,max=id==='margin'?15:10;
     if(event.type==='input'&&(!$(id).value||!Number.isFinite(value)||value<min||value>max))return;
     if(!Number.isFinite(value))value=id==='margin'?5:2;
     state[id]=Math.max(min,Math.min(max,value));

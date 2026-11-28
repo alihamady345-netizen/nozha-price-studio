@@ -22,8 +22,21 @@ for(const [size,[count,orientation]]of Object.entries(geometry.presets)){
   assert.equal(l.cols*l.rows,count);
 }
 const twoUp=geometry.getLayout({paper:'A4',orientation:'landscape',count:2,...geometry.spacing(2),brand:'karaz'});
-assert.equal(twoUp.cw,141);assert.equal(twoUp.ch,200);
-assert.equal(twoUp.w-2*twoUp.cw,15,'Two outer margins and the cutting gutter each occupy 5 mm');
+assert.equal(twoUp.cw,138.5);assert.equal(twoUp.ch,200);
+assert.equal(twoUp.w-2*twoUp.cw,20,'The 10 mm gutter leaves 5 mm on both sides after cutting');
+for(const brand of ['nozha','karaz'])for(const count of [2,4,6,8,12,16,20]){
+  const l=geometry.getLayout({paper:'A4',orientation:count===2?'landscape':'portrait',count,...geometry.spacing(count),brand});
+  const cellW=l.w/l.cols,cellH=l.h/l.rows;
+  assert.ok(Math.abs((cellW-l.cw)/2-5)<1e-9,'Every cut cell retains equal 5 mm left/right frame margins');
+  assert.ok(Math.abs((cellH-l.ch)/2-5)<1e-9,'Every cut cell retains equal 5 mm top/bottom frame margins');
+}
+const cutContext=vm.createContext({state:{margin:5,gap:10},document:{createElement:()=>({setAttribute(){}})},Math,Set});
+vm.runInContext(app.slice(app.indexOf('function appendSheetCutMarks('),app.indexOf('function makePaper(')),cutContext);
+let cutMarks;
+cutContext.appendSheetCutMarks({append:node=>{cutMarks=node.innerHTML;}},twoUp);
+const twoUpCutX=[...cutMarks.matchAll(/left:([\d.]+)mm/g)].map(m=>Number(m[1]));
+assert.equal(twoUpCutX.length,2,'Two marks locate the single cut between the A5 labels');
+assert.ok(twoUpCutX.every(x=>Math.abs(x+.075-148.5)<1e-9),'The A5 cut is at the half-sheet centre, away from both frames');
 geometry.isPromotionTemplate=()=>true;
 for(const brand of ['nozha','karaz']){
   const l=geometry.getLayout({paper:'A4',orientation:'portrait',count:1,margin:5,gap:5,brand});

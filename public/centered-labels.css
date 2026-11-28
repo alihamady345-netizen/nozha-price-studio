@@ -1,5 +1,10 @@
 /* One physical grid for preview, PDF and print. */
 .paper{position:relative;justify-content:center;align-content:center}
+/* One inset frame on every side; cuts stay in the surrounding white gutter. */
+html[lang] .price-tag:not(.promotion-label):not(.shelf-label):not(.no-cut){border:.3mm solid #58655c}
+html[lang][data-output-mode="bw"] .price-tag:not(.promotion-label):not(.shelf-label):not(.no-cut){border-color:#111}
+html[lang] .price-tag:not(.promotion-label):not(.shelf-label)::before,
+html[lang] .price-tag:not(.promotion-label):not(.shelf-label)::after{display:none}
 .label-size-note{font-size:12px;line-height:1.8;color:#5a7163;margin:0 0 14px}
 .invalid-grid-note{align-self:center;text-align:center;font-size:5mm;padding:8mm;color:#93472e}
 .sheet-cut-marks{position:absolute;inset:0;pointer-events:none;z-index:1}
